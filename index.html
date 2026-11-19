@@ -2,220 +2,235 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#14213a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>Home Climate</title>
 <style>
   :root {
-    color-scheme: light;
-    --surface-0: #f4f4f2;
-    --surface-1: #fcfcfb;
-    --border: #e4e3df;
-    --grid: #ecebe7;
-    --axis: #b9b8b2;
-    --text-primary: #0b0b0b;
-    --text-secondary: #52514e;
-    --text-muted: #7a7974;
-    --accent: #2a78d6;
-    --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
-    --series-5: #e87ba4; --series-6: #008300; --series-7: #6250d6; --series-8: #e34948;
-    --good: #0ca30c; --warning: #fab219; --critical: #d03b3b; --neutral: #9a9992; --neutral-ink: #5f5e59;
-    --good-ink: #0a7a0a; --warning-ink: #8a5a00; --critical-ink: #b42f2f;
-    --band: rgb(12 163 12 / 0.07);
-    --notice-bg: #fff6e0; --notice-text: #6b4a00;
+    color-scheme: dark;
+    --ink: #ffffff;
+    --ink-2: rgb(255 255 255 / 0.72);
+    --ink-3: rgb(255 255 255 / 0.52);
+    --glass: rgb(255 255 255 / 0.11);
+    --glass-strong: rgb(255 255 255 / 0.18);
+    --glass-edge: rgb(255 255 255 / 0.22);
+    --glass-hi: rgb(255 255 255 / 0.30);
+    --grid: rgb(255 255 255 / 0.10);
+    --axis: rgb(255 255 255 / 0.28);
+    --temp: #ff9f0a;      /* Apple system orange */
+    --hum: #64d2ff;       /* Apple system cyan */
+    --outside: rgb(255 255 255 / 0.78);
+    --series-1: #64d2ff; --series-2: #ff9f0a; --series-3: #30d158; --series-4: #ffd60a;
+    --series-5: #ff6482; --series-6: #bf5af2; --series-7: #5e5ce6; --series-8: #ff453a;
+    --good: #30d158; --warning: #ffd60a; --critical: #ff453a; --neutral: rgb(255 255 255 / 0.45);
+    --band: rgb(48 209 88 / 0.13);
+    --radius: 22px;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      color-scheme: dark;
-      --surface-0: #111110;
-      --surface-1: #1a1a19;
-      --border: #2c2c2a;
-      --grid: #262624;
-      --axis: #4a4a46;
-      --text-primary: #f0efec;
-      --text-secondary: #c3c2b7;
-      --text-muted: #8e8d86;
-      --accent: #3987e5;
-      --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
-      --series-5: #d55181; --series-6: #0ca30c; --series-7: #9085e9; --series-8: #e66767;
-      --neutral: #6f6e68; --neutral-ink: #b4b3ab;
-      --good-ink: #3fc23f; --warning-ink: #fab219; --critical-ink: #ef7272;
-      --band: rgb(12 163 12 / 0.10);
-      --notice-bg: #2e2510; --notice-text: #f0d48a;
-    }
-  }
-  * { box-sizing: border-box; }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html { background: #0d1626; }
   body {
-    margin: 0; background: var(--surface-0); color: var(--text-primary);
-    font: 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    margin: 0; min-height: 100vh; color: var(--ink);
+    font: 15px/1.4 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Helvetica Neue", "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
+    background:
+      radial-gradient(1200px 700px at 12% -10%, rgb(255 159 10 / 0.38), transparent 60%),
+      radial-gradient(900px 700px at 100% 10%, rgb(94 92 230 / 0.42), transparent 60%),
+      radial-gradient(1000px 800px at 50% 110%, rgb(100 210 255 / 0.30), transparent 60%),
+      linear-gradient(160deg, #1d2b4f 0%, #14213a 45%, #0d1626 100%);
+    background-attachment: fixed;
   }
-  main { max-width: 920px; margin: 0 auto; padding: 20px 16px 48px; }
-  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  .title h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
-  .title p { margin: 2px 0 0; color: var(--text-secondary); font-size: 13px; }
-  .refresh {
-    appearance: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
-    background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border);
-    border-radius: 10px; padding: 7px 12px; font: inherit; font-size: 13px; font-weight: 600; min-height: 36px;
+  main { max-width: 960px; margin: 0 auto; padding: max(18px, env(safe-area-inset-top)) 16px 56px; }
+
+  /* Header */
+  header { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-top: 8px; }
+  h1 { font-size: 34px; line-height: 1.1; margin: 0; font-weight: 700; letter-spacing: -0.02em; }
+  .subtitle { color: var(--ink-2); font-size: 14px; margin-top: 4px; }
+  .circle-btn {
+    appearance: none; width: 42px; height: 42px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; flex: none;
+    color: var(--ink); background: var(--glass-strong); border: 1px solid var(--glass-edge);
+    -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+    box-shadow: inset 0 1px 0 var(--glass-hi), 0 6px 20px rgb(0 0 0 / 0.18);
   }
-  .refresh:hover { border-color: var(--axis); }
-  .refresh:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-  .refresh svg { width: 15px; height: 15px; }
-  .refresh.spin svg { animation: spin 0.8s linear infinite; }
-  .refresh[disabled] { opacity: 0.7; cursor: default; }
+  .circle-btn svg { width: 19px; height: 19px; }
+  .circle-btn:focus-visible { outline: 2px solid var(--hum); outline-offset: 2px; }
+  .circle-btn.spin svg { animation: spin 0.8s linear infinite; }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
-  .seg { display: inline-flex; background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 2px; }
-  .seg button {
-    appearance: none; border: 0; background: transparent; color: var(--text-secondary);
-    font: inherit; font-size: 13px; padding: 6px 11px; border-radius: 8px; cursor: pointer; min-height: 32px;
+  /* Status pills (Home app summary row) */
+  .pills { display: flex; gap: 8px; overflow-x: auto; margin: 16px -16px 0; padding: 2px 16px 4px; scrollbar-width: none; }
+  .pills::-webkit-scrollbar { display: none; }
+  .pill {
+    flex: none; display: flex; align-items: center; gap: 8px; padding: 8px 14px 8px 10px; border-radius: 999px;
+    background: var(--glass); border: 1px solid var(--glass-edge);
+    -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+    box-shadow: inset 0 1px 0 var(--glass-hi);
   }
-  .seg button[aria-pressed="true"] { background: var(--surface-0); color: var(--text-primary); font-weight: 600; box-shadow: 0 0 0 1px var(--border); }
-  .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .pill .ico { width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; font-size: 14px; }
+  .pill .k { font-size: 12px; color: var(--ink-2); line-height: 1.1; }
+  .pill .v { font-size: 14px; font-weight: 600; line-height: 1.2; font-variant-numeric: tabular-nums; }
 
-  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-top: 12px; }
-  .card h2 { font-size: 15px; margin: 0; font-weight: 600; }
-  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-  .hint { font-size: 12px; color: var(--text-muted); }
-  .eyebrow { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+  /* Section titles */
+  .section-title { display: flex; align-items: baseline; justify-content: space-between; margin: 26px 2px 10px; }
+  .section-title h2 { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+  .section-title span { font-size: 13px; color: var(--ink-3); }
 
-  /* KPI tiles */
-  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-  .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
-  .tile .label { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
-  .tile .value { font-size: 38px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin-top: 4px; font-variant-numeric: tabular-nums; }
-  .tile .value small { font-size: 18px; font-weight: 500; color: var(--text-secondary); margin-left: 2px; }
-  .tile .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
-  .key { width: 12px; height: 2px; border-radius: 1px; display: inline-block; flex: none; }
+  /* Glass tiles */
+  .glass {
+    background: var(--glass); border: 1px solid var(--glass-edge); border-radius: var(--radius);
+    -webkit-backdrop-filter: blur(28px) saturate(170%); backdrop-filter: blur(28px) saturate(170%);
+    box-shadow: inset 0 1px 0 var(--glass-hi), 0 10px 30px rgb(0 0 0 / 0.20);
+  }
+  .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 12px; }
+  .tile { padding: 16px; }
+  .tile-head { display: flex; align-items: center; gap: 10px; }
+  .tile-ico { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; flex: none; }
+  .tile-ico.temp { background: rgb(255 159 10 / 0.95); }
+  .tile-ico.hum { background: rgb(100 210 255 / 0.95); }
+  .tile-ico.out { background: rgb(255 255 255 / 0.9); color: #14213a; }
+  .tile-title { font-size: 15px; font-weight: 600; }
+  .tile-sub { font-size: 12px; color: var(--ink-2); }
 
-  /* Status badge: icon + label, never color alone */
-  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 8px 3px 6px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-0); }
-  .badge .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-grid; place-items: center; color: #fff; font-size: 10px; font-weight: 800; line-height: 1; }
-  .badge.good { color: var(--good-ink); } .badge.good .dot { background: var(--good); }
-  .badge.warning { color: var(--warning-ink); } .badge.warning .dot { background: var(--warning); color: #3a2a00; }
-  .badge.critical { color: var(--critical-ink); } .badge.critical .dot { background: var(--critical); }
-  .badge.neutral { color: var(--neutral-ink); } .badge.neutral .dot { background: var(--neutral); }
-
-  /* EPA gauge */
-  .gauges { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; margin-top: 12px; }
-  .gauge { text-align: center; }
-  .gauge-room { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 6px; }
-  .gauge svg { width: 100%; max-width: 300px; display: block; margin: 0 auto; overflow: visible; }
-  .gauge .verdict { margin-top: 6px; }
-  .gauge .verdict-text { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
-  .zones { margin-top: 14px; text-align: left; }
-  .zones .bar { display: flex; height: 10px; gap: 2px; margin-top: 6px; }
+  /* Gauges */
+  .gauge svg { width: 100%; max-width: 260px; display: block; margin: 6px auto 0; overflow: visible; }
+  .verdict { display: flex; flex-direction: column; align-items: center; gap: 6px; margin-top: 2px; text-align: center; }
+  .verdict p { margin: 0; font-size: 13px; color: var(--ink-2); max-width: 300px; }
+  .badge { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; padding: 4px 10px 4px 5px; border-radius: 999px; background: rgb(255 255 255 / 0.14); border: 1px solid var(--glass-edge); }
+  .badge .dot { width: 16px; height: 16px; border-radius: 50%; display: inline-grid; place-items: center; font-size: 10px; font-weight: 800; color: #10182a; }
+  .badge.good .dot { background: var(--good); }
+  .badge.warning .dot { background: var(--warning); }
+  .badge.critical .dot { background: var(--critical); color: #fff; }
+  .badge.neutral .dot { background: rgb(255 255 255 / 0.75); }
+  .compare { display: flex; justify-content: center; gap: 18px; margin-top: 12px; font-size: 12px; color: var(--ink-2); flex-wrap: wrap; }
+  .compare b { color: var(--ink); font-variant-numeric: tabular-nums; }
+  .compare .mk { display: inline-block; width: 0; height: 0; border-left: 5px solid transparent; border-right: 5px solid transparent; border-top: 8px solid var(--outside); margin-right: 5px; vertical-align: 1px; }
+  .compare .me { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #fff; box-shadow: 0 0 0 2px rgb(0 0 0 / 0.35); margin-right: 5px; vertical-align: -1px; }
+  .zones { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--grid); }
+  .zones .cap { font-size: 12px; color: var(--ink-3); }
+  .zones .bar { display: flex; height: 8px; gap: 2px; margin-top: 7px; }
   .zones .bar span { border-radius: 2px; min-width: 0; }
   .zones .bar span:first-child { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
   .zones .bar span:last-child { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
-  .zones .legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; font-size: 12px; }
-  .zones .legend div { display: flex; flex-direction: column; gap: 1px; }
-  .zones .legend b { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--text-primary); }
-  .zones .legend span { color: var(--text-secondary); display: flex; align-items: center; gap: 5px; }
+  .zones .legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; font-size: 11.5px; }
+  .zones .legend b { display: block; font-size: 14px; font-variant-numeric: tabular-nums; }
+  .zones .legend span { color: var(--ink-2); display: flex; align-items: center; gap: 5px; }
   .swatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
-  .source { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--grid); font-size: 12px; color: var(--text-secondary); }
-  .source a { color: var(--accent); text-decoration: none; }
-  .source a:hover { text-decoration: underline; }
 
-  /* Charts */
-  .legend-row { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+  /* Outside tile */
+  .outside { display: grid; grid-template-columns: 1fr auto; gap: 8px 16px; align-items: center; }
+  .out-now { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-top: 10px; }
+  .out-now .big { font-size: 48px; font-weight: 300; letter-spacing: -0.03em; line-height: 1; font-variant-numeric: tabular-nums; }
+  .out-now .cond { font-size: 15px; color: var(--ink-2); }
+  .out-facts { display: flex; gap: 22px; flex-wrap: wrap; margin-top: 12px; }
+  .out-facts div { font-size: 12px; color: var(--ink-2); }
+  .out-facts b { display: block; font-size: 17px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .diff { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--grid); font-size: 13px; color: var(--ink-2); }
+  .diff b { color: var(--ink); }
+
+  /* Controls */
+  .seg { display: inline-flex; padding: 3px; border-radius: 12px; background: rgb(0 0 0 / 0.22); border: 1px solid var(--glass-edge); }
+  .seg button { appearance: none; border: 0; background: transparent; color: var(--ink-2); font: inherit; font-size: 13px; font-weight: 500; padding: 6px 11px; border-radius: 9px; cursor: pointer; min-height: 30px; }
+  .seg button[aria-pressed="true"] { background: rgb(255 255 255 / 0.22); color: var(--ink); font-weight: 600; box-shadow: inset 0 1px 0 var(--glass-hi); }
+  .seg button:focus-visible { outline: 2px solid var(--hum); outline-offset: 1px; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; }
+
+  /* Combined chart */
+  .chart-card { padding: 16px 16px 12px; }
+  .chart-top { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .chart-top h3 { margin: 0; font-size: 17px; font-weight: 700; }
+  .legend-row { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--ink-2); margin-top: 10px; }
   .legend-row span { display: inline-flex; align-items: center; gap: 6px; }
-  .legend-row .ref { width: 14px; height: 0; border-top: 1.5px dashed var(--critical); }
-  .legend-row .bandkey { width: 14px; height: 10px; background: var(--band); border: 1px solid rgb(12 163 12 / 0.35); border-radius: 2px; }
-  .chart { position: relative; margin-top: 8px; touch-action: pan-y; }
+  .lk { width: 16px; height: 0; border-top: 2.5px solid; border-radius: 2px; }
+  .lk.dash { border-top-style: dashed; border-top-width: 2px; }
+  .bandkey { width: 14px; height: 10px; background: var(--band); border: 1px solid rgb(48 209 88 / 0.5); border-radius: 2px; }
+  .chart { position: relative; margin-top: 6px; touch-action: pan-y; }
   .chart svg { display: block; width: 100%; overflow: visible; }
-  .chart svg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
-  .tick { font-size: 11px; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
-  .reflabel { font-size: 10.5px; font-weight: 600; }
-  .stats { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid); }
-  .stats div { font-size: 12px; color: var(--text-secondary); }
-  .stats b { display: block; font-size: 15px; color: var(--text-primary); font-variant-numeric: tabular-nums; font-weight: 600; }
+  .chart svg:focus-visible { outline: 2px solid var(--hum); outline-offset: 2px; border-radius: 8px; }
+  .tick { font-size: 11px; fill: var(--ink-3); font-variant-numeric: tabular-nums; }
+  .ptitle { font-size: 12px; font-weight: 600; fill: var(--ink-2); }
   .tip {
-    position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border);
-    border-radius: 10px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 16px rgb(0 0 0 / 0.12);
-    white-space: nowrap; display: none; z-index: 2;
+    position: absolute; pointer-events: none; display: none; z-index: 2; white-space: nowrap; font-size: 12px;
+    padding: 9px 11px; border-radius: 14px; color: var(--ink);
+    background: rgb(30 40 64 / 0.72); border: 1px solid var(--glass-edge);
+    -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+    box-shadow: inset 0 1px 0 var(--glass-hi), 0 8px 24px rgb(0 0 0 / 0.3);
   }
-  .tip .t { color: var(--text-secondary); margin-bottom: 4px; }
-  .tip .row { display: flex; align-items: center; gap: 6px; }
-  .tip strong { font-variant-numeric: tabular-nums; }
-  .tip .nm { color: var(--text-secondary); }
+  .tip .t { color: var(--ink-2); margin-bottom: 5px; }
+  .tip .row { display: grid; grid-template-columns: 14px auto auto; gap: 6px; align-items: center; }
+  .tip .row strong { font-variant-numeric: tabular-nums; text-align: right; }
+  .tip .row .nm { color: var(--ink-2); }
+  .tip .sep { height: 1px; background: var(--grid); margin: 5px 0; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 10px; margin-top: 10px; padding-top: 12px; border-top: 1px solid var(--grid); }
+  .stats div { font-size: 11.5px; color: var(--ink-2); }
+  .stats b { display: block; font-size: 16px; color: var(--ink); font-weight: 600; font-variant-numeric: tabular-nums; }
 
-  details { margin-top: 12px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; }
-  summary { cursor: pointer; font-weight: 600; font-size: 15px; }
+  details { margin-top: 12px; padding: 14px 16px; }
+  summary { cursor: pointer; font-weight: 600; }
   table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; font-variant-numeric: tabular-nums; }
-  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--grid); }
-  th { color: var(--text-secondary); font-weight: 500; }
+  th, td { text-align: left; padding: 7px 4px; border-bottom: 1px solid var(--grid); }
+  th { color: var(--ink-2); font-weight: 500; }
   td.num, th.num { text-align: right; }
 
-  .notice { background: var(--notice-bg); color: var(--notice-text); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-top: 12px; }
-  .notice code { font-size: 12px; }
-  .empty { color: var(--text-muted); font-size: 13px; padding: 30px 0; text-align: center; }
-  footer { margin-top: 20px; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
-  footer a { color: var(--text-secondary); }
+  .notice { margin-top: 14px; padding: 12px 14px; font-size: 14px; border-radius: 16px; background: rgb(255 214 10 / 0.16); border: 1px solid rgb(255 214 10 / 0.35); }
+  .empty { color: var(--ink-3); font-size: 13px; padding: 26px 0; text-align: center; }
+  .sources { margin-top: 18px; padding: 14px 16px; font-size: 12px; color: var(--ink-2); line-height: 1.6; }
+  .sources h4 { margin: 0 0 4px; font-size: 13px; color: var(--ink); }
+  .sources a { color: var(--hum); text-decoration: none; }
+  .sources a:hover { text-decoration: underline; }
+  .sources ol { margin: 0; padding-left: 18px; }
+
+  @supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+    .glass, .pill, .circle-btn { background: rgb(36 48 78 / 0.92); }
+  }
+  @media (prefers-reduced-motion: reduce) { .circle-btn.spin svg { animation: none; } }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <div class="title">
+    <div>
       <h1>Home Climate</h1>
-      <p id="updated">Loading…</p>
+      <div class="subtitle" id="updated">Loading…</div>
     </div>
-    <button class="refresh" id="refresh" type="button" aria-label="Refresh readings">
+    <button class="circle-btn" id="refresh" type="button" aria-label="Refresh readings" title="Refresh">
       <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M13.5 2.5v3h-3"/>
       </svg>
-      <span>Refresh</span>
     </button>
   </header>
 
-  <div class="controls" role="toolbar" aria-label="Chart filters">
-    <div class="seg" id="range" aria-label="Time range">
-      <button data-v="24h" aria-pressed="true">24 h</button>
-      <button data-v="7d" aria-pressed="false">7 days</button>
-      <button data-v="30d" aria-pressed="false">30 days</button>
-      <button data-v="all" aria-pressed="false">All</button>
-    </div>
-    <div class="seg" id="units" aria-label="Temperature unit">
-      <button data-v="F" aria-pressed="true">°F</button>
-      <button data-v="C" aria-pressed="false">°C</button>
-    </div>
-  </div>
-
+  <div class="pills" id="pills" aria-live="polite"></div>
   <div id="notice"></div>
-  <section class="tiles" id="tiles" aria-live="polite"></section>
 
-  <section class="card" aria-labelledby="epaTitle">
-    <div class="card-head">
-      <div>
-        <div class="eyebrow">Mold prevention</div>
-        <h2 id="epaTitle">Humidity vs. EPA guideline</h2>
+  <div id="rooms"></div>
+
+  <div class="section-title"><h2>Outside</h2><span id="outPlace"></span></div>
+  <div class="glass tile" id="outside"></div>
+
+  <div class="section-title"><h2>History</h2><span id="rangeLabel"></span></div>
+  <section class="glass chart-card">
+    <div class="chart-top">
+      <h3>Temperature &amp; Humidity</h3>
+      <div class="controls" role="toolbar" aria-label="Chart filters">
+        <div class="seg" id="range" aria-label="Time range">
+          <button data-v="24h" aria-pressed="true">24H</button>
+          <button data-v="7d" aria-pressed="false">7D</button>
+          <button data-v="30d" aria-pressed="false">30D</button>
+          <button data-v="all" aria-pressed="false">All</button>
+        </div>
+        <div class="seg" id="units" aria-label="Temperature unit">
+          <button data-v="F" aria-pressed="true">°F</button>
+          <button data-v="C" aria-pressed="false">°C</button>
+        </div>
       </div>
-      <span class="hint">Keep below 60% · ideal 30–50%</span>
     </div>
-    <div class="gauges" id="gauges"></div>
-    <div class="source">
-      Source: U.S. EPA, <a href="https://www.epa.gov/mold/brief-guide-mold-moisture-and-your-home" target="_blank" rel="noopener">A Brief Guide to Mold, Moisture and Your Home</a>.
-      The EPA advises keeping indoor humidity below 60%, ideally between 30% and 50%.
-    </div>
+    <div class="legend-row" id="legend"></div>
+    <div class="chart" id="chart"></div>
+    <div class="stats" id="stats"></div>
   </section>
 
-  <section class="card">
-    <div class="card-head"><h2>Relative humidity</h2><span class="hint" id="humHint"></span></div>
-    <div class="legend-row" id="legendH"></div>
-    <div class="chart" id="chartH"></div>
-    <div class="stats" id="statsH"></div>
-  </section>
-
-  <section class="card">
-    <div class="card-head"><h2>Temperature</h2><span class="hint" id="tempHint"></span></div>
-    <div class="legend-row" id="legendT"></div>
-    <div class="chart" id="chartT"></div>
-    <div class="stats" id="statsT"></div>
-  </section>
-
-  <details>
+  <details class="glass">
     <summary>Readings table</summary>
     <table>
       <thead><tr><th>Time</th><th>Room</th><th class="num">Temp</th><th class="num">Humidity</th></tr></thead>
@@ -223,37 +238,94 @@
     </table>
   </details>
 
-  <footer>
-    Readings come from the HomePod's built-in sensor and are logged by GitHub Actions; the page also refreshes itself every 5 minutes.
-    The HomePod sensor is not a calibrated instrument, so treat values as trends. For a precise check, compare against a stand-alone hygrometer.<br>
-    Humidity reference: <a href="https://www.epa.gov/mold/brief-guide-mold-moisture-and-your-home" target="_blank" rel="noopener">EPA – A Brief Guide to Mold, Moisture and Your Home</a>.
-  </footer>
+  <section class="glass sources">
+    <h4>Standards &amp; data sources</h4>
+    <ol>
+      <li>Humidity: U.S. EPA, <a href="https://www.epa.gov/mold/brief-guide-mold-moisture-and-your-home" target="_blank" rel="noopener">A Brief Guide to Mold, Moisture and Your Home</a> — keep indoor humidity below 60%, ideally 30–50%.</li>
+      <li>Temperature comfort: ASHRAE Standard 55 ranges as summarized by <a href="https://epi.publichealth.nc.gov/oee/iaq/hvac.html" target="_blank" rel="noopener">NC Division of Public Health</a> (about 68.5–76°F in winter, 73–80°F in summer).</li>
+      <li>Outside weather: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo.com</a> (CC BY 4.0), updated about every 15 minutes.</li>
+      <li>Room readings: HomePod built-in sensor, logged by GitHub Actions. Not a calibrated instrument; treat values as trends.</li>
+    </ol>
+  </section>
 </main>
 
 <script>
 (() => {
   // ---- Settings you can change ------------------------------------------
   const CONFIG = {
-    repo: "",          // "your-username/your-repo" - leave blank to detect it from the GitHub Pages address
-    branch: "data",    // branch the workflow writes readings to
+    repo: "",                 // "your-username/your-repo" - blank = detect from the GitHub Pages address
+    branch: "data",
     file: "readings.csv",
     refreshMinutes: 5,
+    place: { name: "Caguas, PR", lat: 18.2341, lon: -66.0485 },
   };
-  // EPA: keep indoor RH below 60%, ideally 30-50%.
-  const EPA = { idealLow: 30, idealHigh: 50, limit: 60 };
-  const ZONES = [
-    { key: "dry",   from: 0,  to: 30,  label: "Dry",        status: "neutral",  icon: "–", text: "Below the EPA's ideal range. Air may feel dry." },
-    { key: "ideal", from: 30, to: 50,  label: "Ideal",      status: "good",     icon: "✓", text: "Inside the EPA's ideal 30–50% range." },
-    { key: "ok",    from: 50, to: 60,  label: "Acceptable", status: "warning",  icon: "!", text: "Below the 60% EPA limit, but above ideal. Keep an eye on it." },
-    { key: "risk",  from: 60, to: 100, label: "Mold risk",  status: "critical", icon: "▲", text: "Above the EPA's 60% limit. Mold can grow; dehumidify or ventilate." },
-  ];
+  // Humidity zones - U.S. EPA: keep indoor RH below 60%, ideally 30-50%.
+  const HUM = {
+    min: 0, max: 100, unit: "%",
+    zones: [
+      { from: 0,  to: 30,  label: "Dry",        status: "neutral",  icon: "–", text: "Below the EPA's ideal range. Air may feel dry." },
+      { from: 30, to: 50,  label: "Ideal",      status: "good",     icon: "✓", text: "Inside the EPA's ideal 30–50% range." },
+      { from: 50, to: 60,  label: "Acceptable", status: "warning",  icon: "!", text: "Under the EPA's 60% limit but above ideal. Keep an eye on it." },
+      { from: 60, to: 100, label: "Mold risk",  status: "critical", icon: "▲", text: "Above the EPA's 60% limit. Mold can grow; dehumidify or run the A/C." },
+    ],
+    ticks: [0, 30, 50, 60, 100],
+  };
+  // Temperature zones (°F) - comfort band based on ASHRAE Standard 55.
+  const TEMP = {
+    min: 60, max: 95, unit: "°F",
+    zones: [
+      { from: 60, to: 68, label: "Cool",        status: "neutral",  icon: "–", text: "Below the usual comfort range." },
+      { from: 68, to: 79, label: "Comfortable", status: "good",     icon: "✓", text: "Within the ASHRAE comfort range." },
+      { from: 79, to: 85, label: "Warm",        status: "warning",  icon: "!", text: "Above the comfort range. Consider the A/C or a fan." },
+      { from: 85, to: 95, label: "Hot",         status: "critical", icon: "▲", text: "Hot indoors. Cool the room down." },
+    ],
+    ticks: [60, 68, 79, 85, 95],
+  };
   // -----------------------------------------------------------------------
 
   const $ = (id) => document.getElementById(id);
-  const SLOTS = 8;
-  const state = { range: "24h", unit: "F", rows: [], rooms: [], lastFetch: null };
+  const state = { range: "24h", unit: "F", rows: [], rooms: [], wx: null, lastFetch: null };
   try { state.unit = localStorage.getItem("climate-unit") || "F"; } catch (e) {}
 
+  const H = 3600e3, D = 24 * H;
+  const toUnit = (f) => (f == null ? null : state.unit === "C" ? (f - 32) * 5 / 9 : f);
+  const fmt1 = (v) => (v == null || isNaN(v) ? "–" : (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, ""));
+  const fmt0 = (v) => (v == null || isNaN(v) ? "–" : String(Math.round(v)));
+  const avg = (a) => (a.length ? a.reduce((s, v) => s + v, 0) / a.length : null);
+  const zoneOf = (cfg, v) => cfg.zones.find((z) => v < z.to) || cfg.zones[cfg.zones.length - 1];
+  const statusColor = (s) => `var(--${s})`;
+  const deg = () => "°" + state.unit;
+  const roomColor = (room, measure) => state.rooms.length > 1
+    ? `var(--series-${(state.rooms.indexOf(room) % 8) + 1})`
+    : measure === "temp" ? "var(--temp)" : "var(--hum)";
+
+  function rangeStart() {
+    return { "24h": Date.now() - D, "7d": Date.now() - 7 * D, "30d": Date.now() - 30 * D, all: -Infinity }[state.range];
+  }
+  const rangeName = () => ({ "24h": "Last 24 hours", "7d": "Last 7 days", "30d": "Last 30 days", all: "All time" }[state.range]);
+
+  function ago(d) {
+    const m = Math.round((Date.now() - d) / 60000);
+    if (m < 1) return "just now";
+    if (m < 60) return `${m} min ago`;
+    const h = Math.round(m / 60);
+    return h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`;
+  }
+
+  const SVG_TAGS = new Set(["svg", "path", "line", "text", "tspan", "circle", "rect", "g", "defs", "linearGradient", "stop", "polygon", "clipPath"]);
+  function el(tag, attrs = {}, text) {
+    const n = SVG_TAGS.has(tag) ? document.createElementNS("http://www.w3.org/2000/svg", tag) : document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (text != null) n.textContent = text;
+    return n;
+  }
+  function badge(z) {
+    const b = el("span", { class: `badge ${z.status}` });
+    b.append(el("span", { class: "dot", "aria-hidden": "true" }, z.icon), document.createTextNode(z.label));
+    return b;
+  }
+
+  // ---- Data: room readings from GitHub -----------------------------------
   function repoName() {
     const q = new URLSearchParams(location.search);
     let repo = q.get("repo") || CONFIG.repo;
@@ -264,19 +336,28 @@
     }
     return repo || null;
   }
-  function sources() {
+  function csvSources() {
     const q = new URLSearchParams(location.search);
     if (q.get("csv")) return [{ url: q.get("csv") }];
     const repo = repoName();
     if (!repo) return [];
     return [
-      // GitHub API: freshest copy (about 1 minute cache)
       { url: `https://api.github.com/repos/${repo}/contents/${CONFIG.file}?ref=${CONFIG.branch}`, headers: { Accept: "application/vnd.github.raw+json" } },
-      // Fallback: raw file (about 5 minute cache)
       { url: `https://raw.githubusercontent.com/${repo}/${CONFIG.branch}/${CONFIG.file}` },
     ];
   }
-
+  async function fetchCsv() {
+    let lastErr = null;
+    for (const src of csvSources()) {
+      try {
+        const url = src.url + (src.url.includes("?") ? "&" : "?") + "t=" + Date.now();
+        const res = await fetch(url, { cache: "no-store", headers: src.headers || {} });
+        if (!res.ok) { lastErr = res.status; continue; }
+        return await res.text();
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr;
+  }
   function parse(text) {
     const lines = text.trim().split(/\r?\n/);
     const head = lines.shift().split(",");
@@ -288,168 +369,204 @@
       if (isNaN(t)) continue;
       const tv = c[ix("temperature")], hv = c[ix("humidity")];
       let temp = tv === "" || tv == null ? null : +tv;
-      const unit = (c[ix("unit")] || "F").toUpperCase();
-      if (temp != null && unit === "C") temp = temp * 9 / 5 + 32; // stored internally in °F
+      if (temp != null && (c[ix("unit")] || "F").toUpperCase() === "C") temp = temp * 9 / 5 + 32; // internal °F
       out.push({ t, room: c[ix("room")] || "HomePod", tempF: temp, hum: hv === "" || hv == null ? null : +hv });
     }
     return out.sort((a, b) => a.t - b.t);
   }
 
-  const toUnit = (f) => (f == null ? null : state.unit === "C" ? (f - 32) * 5 / 9 : f);
-  const fmt1 = (v) => (v == null ? "–" : (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, ""));
-  const color = (room) => `var(--series-${(state.rooms.indexOf(room) % SLOTS) + 1})`;
-  const zoneOf = (h) => ZONES.find((z) => h < z.to) || ZONES[ZONES.length - 1];
-  const avg = (a) => a.reduce((s, v) => s + v, 0) / a.length;
-
-  function rangeStart() {
-    const now = Date.now(), h = 3600e3;
-    return { "24h": now - 24 * h, "7d": now - 7 * 24 * h, "30d": now - 30 * 24 * h, all: -Infinity }[state.range];
-  }
-  const rangeName = () => ({ "24h": "last 24 h", "7d": "last 7 days", "30d": "last 30 days", all: "all time" }[state.range]);
-
-  function ago(d) {
-    const m = Math.round((Date.now() - d) / 60000);
-    if (m < 1) return "just now";
-    if (m < 60) return `${m} min ago`;
-    const h = Math.round(m / 60);
-    if (h < 48) return `${h} h ago`;
-    return `${Math.round(h / 24)} days ago`;
-  }
-
-  const SVG_TAGS = new Set(["svg", "path", "line", "text", "circle", "rect", "g", "defs", "linearGradient", "stop", "polygon"]);
-  function el(tag, attrs = {}, text) {
-    const n = SVG_TAGS.has(tag) ? document.createElementNS("http://www.w3.org/2000/svg", tag) : document.createElement(tag);
-    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
-    if (text != null) n.textContent = text;
-    return n;
-  }
-  function badge(zone) {
-    const b = el("span", { class: `badge ${zone.status}` });
-    b.append(el("span", { class: "dot", "aria-hidden": "true" }, zone.icon), document.createTextNode(zone.label));
-    return b;
-  }
-  function roomKey(room) {
-    const s = el("span", { class: "key", style: `background:${color(room)}` });
-    return s;
-  }
-
-  // ---- KPI tiles -----------------------------------------------------------
-  function renderTiles(rows) {
-    const box = $("tiles");
-    box.replaceChildren();
-    const u = "°" + state.unit;
-    for (const room of state.rooms) {
-      const mine = state.rows.filter((r) => r.room === room);
-      const lastT = [...mine].reverse().find((r) => r.tempF != null);
-      const lastH = [...mine].reverse().find((r) => r.hum != null);
-      const inRange = rows.filter((r) => r.room === room);
-      const temps = inRange.map((r) => toUnit(r.tempF)).filter((v) => v != null);
-      const hums = inRange.map((r) => r.hum).filter((v) => v != null);
-      const label = state.rooms.length > 1 ? ` · ${room}` : "";
-      box.append(tile("Temperature" + label, lastT && fmt1(toUnit(lastT.tempF)), u,
-        temps.length ? `Low ${fmt1(Math.min(...temps))} · High ${fmt1(Math.max(...temps))}` : "No readings in range", room));
-      box.append(tile("Humidity" + label, lastH && fmt1(lastH.hum), "%",
-        hums.length ? `Low ${fmt1(Math.min(...hums))} · High ${fmt1(Math.max(...hums))}` : "No readings in range", room,
-        lastH ? zoneOf(lastH.hum) : null));
-    }
-  }
-  function tile(label, value, unit, sub, room, zone) {
-    const t = el("div", { class: "tile" });
-    const l = el("div", { class: "label" });
-    if (state.rooms.length > 1) l.append(roomKey(room));
-    l.append(document.createTextNode(label));
-    const v = el("div", { class: "value" }, value ?? "–");
-    if (value != null) v.append(el("small", {}, unit));
-    t.append(l, v);
-    if (zone) { const z = el("div", { style: "margin-top:6px" }); z.append(badge(zone)); t.append(z); }
-    t.append(el("div", { class: "sub" }, sub));
-    return t;
-  }
-
-  // ---- EPA gauge -----------------------------------------------------------
-  function renderGauges(rows) {
-    const box = $("gauges");
-    box.replaceChildren();
-    for (const room of state.rooms) {
-      const last = [...state.rows].reverse().find((r) => r.room === room && r.hum != null);
-      const hums = rows.filter((r) => r.room === room && r.hum != null).map((r) => r.hum);
-      const g = el("div", { class: "gauge" });
-      if (state.rooms.length > 1) {
-        const rl = el("div", { class: "gauge-room" });
-        rl.append(roomKey(room), document.createTextNode(room));
-        g.append(rl);
-      }
-      g.append(gaugeSvg(last ? last.hum : null));
-      if (last) {
-        const z = zoneOf(last.hum);
-        const v = el("div", { class: "verdict" });
-        v.append(badge(z));
-        g.append(v, el("div", { class: "verdict-text" }, z.text));
-      } else {
-        g.append(el("div", { class: "verdict-text" }, "No humidity reading yet."));
-      }
-      g.append(zoneBar(hums));
-      box.append(g);
-    }
-    if (!state.rooms.length) box.append(el("div", { class: "empty" }, "No readings yet."));
-  }
-
-  function gaugeSvg(value) {
-    const W = 300, H = 178, cx = 150, cy = 150, r = 118, thick = 18;
-    const ang = (v) => Math.PI * (1 - v / 100);                 // 0% at left, 100% at right
-    const pt = (v, rad) => [cx + rad * Math.cos(ang(v)), cy - rad * Math.sin(ang(v))];
-    const active = value == null ? null : zoneOf(value);
-    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
-      "aria-label": value == null ? "Humidity gauge, no reading" : `Humidity ${fmt1(value)} percent, ${zoneOf(value).label}` });
-
-    // zone arcs, 2px gaps between them
-    const gapDeg = 0.9; // in % units
-    ZONES.forEach((z, i) => {
-      const a = z.from + (i ? gapDeg / 2 : 0), b = z.to - (i < ZONES.length - 1 ? gapDeg / 2 : 0);
-      const [x1, y1] = pt(a, r), [x2, y2] = pt(b, r);
-      svg.append(el("path", {
-        d: `M${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2}`, fill: "none",
-        stroke: `var(--${z.status})`, "stroke-width": thick, "stroke-linecap": "butt",
-        opacity: active && active.key !== z.key ? 0.28 : 1,
-      }));
+  // ---- Data: outside weather from Open-Meteo -----------------------------
+  async function fetchWeather() {
+    const q = new URLSearchParams(location.search);
+    const p = CONFIG.place;
+    const url = q.get("wx") || `https://api.open-meteo.com/v1/forecast?latitude=${p.lat}&longitude=${p.lon}` +
+      `&current=temperature_2m,relative_humidity_2m,apparent_temperature,weather_code,is_day` +
+      `&hourly=temperature_2m,relative_humidity_2m&past_days=92&forecast_days=1&timeformat=unixtime&timezone=GMT`;
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("weather " + res.status);
+    const j = await res.json();
+    const c = j.current || {};
+    const now = Date.now();
+    const hourly = [];
+    (j.hourly?.time || []).forEach((t, i) => {
+      const ms = t * 1000;
+      if (ms > now) return;
+      const tc = j.hourly.temperature_2m[i], rh = j.hourly.relative_humidity_2m[i];
+      if (tc == null && rh == null) return;
+      hourly.push({ t: ms, tempF: tc == null ? null : tc * 9 / 5 + 32, hum: rh });
     });
-    // threshold ticks + labels
-    for (const v of [0, 30, 50, 60, 100]) {
-      const [xa, ya] = pt(v, r + thick / 2 + 2), [xb, yb] = pt(v, r + thick / 2 + 7);
-      svg.append(el("line", { x1: xa, y1: ya, x2: xb, y2: yb, stroke: "var(--axis)", "stroke-width": 1 }));
-      const [lx, ly] = pt(v, r + thick / 2 + 17);
-      svg.append(el("text", { x: lx, y: ly + 4, "text-anchor": v < 40 ? "end" : v > 60 ? "start" : "middle", class: "tick" }, v + "%"));
+    return {
+      now: { t: (c.time || 0) * 1000, tempF: c.temperature_2m * 9 / 5 + 32, feelsF: c.apparent_temperature * 9 / 5 + 32, hum: c.relative_humidity_2m, code: c.weather_code, day: c.is_day },
+      hourly,
+    };
+  }
+  function condition(code, day) {
+    const map = [
+      [[0], day ? "☀️" : "🌙", "Clear"], [[1], day ? "🌤️" : "🌙", "Mostly clear"], [[2], "⛅", "Partly cloudy"], [[3], "☁️", "Cloudy"],
+      [[45, 48], "🌫️", "Fog"], [[51, 53, 55, 56, 57], "🌦️", "Drizzle"], [[61, 63, 65, 66, 67], "🌧️", "Rain"],
+      [[71, 73, 75, 77, 85, 86], "🌨️", "Snow"], [[80, 81, 82], "🌦️", "Showers"], [[95, 96, 99], "⛈️", "Thunderstorms"],
+    ];
+    const hit = map.find(([codes]) => codes.includes(code));
+    return hit ? { icon: hit[1], text: hit[2] } : { icon: "🌡️", text: "Current conditions" };
+  }
+
+  // ---- Pills ----------------------------------------------------------------
+  function renderPills() {
+    const box = $("pills");
+    box.replaceChildren();
+    const add = (icon, bg, k, v) => {
+      const p = el("div", { class: "pill" });
+      const i = el("span", { class: "ico", style: `background:${bg}` }, icon);
+      const t = el("div");
+      t.append(el("div", { class: "k" }, k), el("div", { class: "v" }, v));
+      p.append(i, t);
+      box.append(p);
+    };
+    for (const room of state.rooms) {
+      const lt = lastOf(room, "tempF"), lh = lastOf(room, "hum");
+      const suffix = state.rooms.length > 1 ? ` · ${room}` : "";
+      if (lt) add("🌡️", "rgb(255 159 10 / 0.9)", "Climate" + suffix, fmt1(toUnit(lt.tempF)) + "°");
+      if (lh) add("💧", "rgb(100 210 255 / 0.9)", "Humidity" + suffix, `${fmt0(lh.hum)}% · ${zoneOf(HUM, lh.hum).label}`);
     }
+    if (state.wx) {
+      const c = condition(state.wx.now.code, state.wx.now.day);
+      add(c.icon, "rgb(255 255 255 / 0.85)", "Outside", `${fmt0(toUnit(state.wx.now.tempF))}° · ${fmt0(state.wx.now.hum)}%`);
+    }
+  }
+  const lastOf = (room, key) => [...state.rows].reverse().find((r) => r.room === room && r[key] != null);
+
+  // ---- Room sections with gauges ------------------------------------------
+  function renderRooms(rows) {
+    const box = $("rooms");
+    box.replaceChildren();
+    if (!state.rooms.length) {
+      const t = el("div", { class: "section-title" }); t.append(el("h2", {}, "Rooms"));
+      const g = el("div", { class: "glass tile empty" }, "No readings yet.");
+      box.append(t, g);
+      return;
+    }
+    for (const room of state.rooms) {
+      const lt = lastOf(room, "tempF"), lh = lastOf(room, "hum");
+      const t = el("div", { class: "section-title" });
+      t.append(el("h2", {}, room), el("span", {}, lh || lt ? `Updated ${ago((lh || lt).t)}` : ""));
+      const grid = el("div", { class: "grid2" });
+      const inRange = rows.filter((r) => r.room === room);
+      grid.append(
+        gaugeTile({
+          cfg: TEMP, kind: "temp", title: "Temperature", sub: "Comfort range · ASHRAE 55",
+          value: lt ? lt.tempF : null, outside: state.wx ? state.wx.now.tempF : null,
+          display: (f) => fmt1(toUnit(f)), unitLabel: deg(),
+          tickLabel: (f) => fmt0(toUnit(f)) + "°",
+          history: inRange.map((r) => r.tempF).filter((v) => v != null),
+        }),
+        gaugeTile({
+          cfg: HUM, kind: "hum", title: "Humidity", sub: "Mold prevention · U.S. EPA",
+          value: lh ? lh.hum : null, outside: state.wx ? state.wx.now.hum : null,
+          display: (h) => fmt0(h), unitLabel: "%",
+          tickLabel: (h) => h + "%",
+          history: inRange.map((r) => r.hum).filter((v) => v != null),
+        }),
+      );
+      box.append(t, grid);
+    }
+  }
+
+  function gaugeTile({ cfg, kind, title, sub, value, outside, display, unitLabel, tickLabel, history }) {
+    const tile = el("div", { class: "glass tile gauge" });
+    const head = el("div", { class: "tile-head" });
+    head.append(el("span", { class: `tile-ico ${kind}`, "aria-hidden": "true" }, kind === "temp" ? "🌡️" : "💧"));
+    const ht = el("div");
+    ht.append(el("div", { class: "tile-title" }, title), el("div", { class: "tile-sub" }, sub));
+    head.append(ht);
+    tile.append(head, gaugeSvg(cfg, value, outside, display, unitLabel, tickLabel, title));
+
+    const v = el("div", { class: "verdict" });
     if (value != null) {
-      const v = Math.max(0, Math.min(100, value));
-      // value marker on the arc
-      const [mx, my] = pt(v, r);
-      svg.append(el("circle", { cx: mx, cy: my, r: 8, fill: "var(--surface-1)", stroke: "var(--text-primary)", "stroke-width": 2.5 }));
-      const big = el("text", { x: cx, y: cy - 22, "text-anchor": "middle", style: "font-size:40px;font-weight:700;fill:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:-0.02em" }, fmt1(value));
-      big.append(el("tspan", { style: "font-size:16px;font-weight:500;fill:var(--text-secondary)" }, "%"));
+      const z = zoneOf(cfg, value);
+      v.append(badge(z), el("p", {}, z.text));
+    } else v.append(el("p", {}, "No reading yet."));
+    tile.append(v);
+
+    if (value != null || outside != null) {
+      const cmp = el("div", { class: "compare" });
+      if (value != null) { const a = el("span"); a.append(el("span", { class: "me" }), document.createTextNode("Inside "), el("b", {}, display(value) + unitLabel)); cmp.append(a); }
+      if (outside != null) { const b = el("span"); b.append(el("span", { class: "mk" }), document.createTextNode("Outside "), el("b", {}, display(outside) + unitLabel)); cmp.append(b); }
+      tile.append(cmp);
+    }
+    tile.append(zoneBar(cfg, history));
+    return tile;
+  }
+
+  // 240° Home-style dial
+  function gaugeSvg(cfg, value, outside, display, unitLabel, tickLabel, title) {
+    const W = 260, Hh = 196, cx = 130, cy = 112, r = 84, thick = 14;
+    const START = 150, SWEEP = 240;
+    const frac = (v) => (Math.max(cfg.min, Math.min(cfg.max, v)) - cfg.min) / (cfg.max - cfg.min);
+    const angle = (v) => ((START + frac(v) * SWEEP) * Math.PI) / 180;
+    const pt = (v, rad) => [cx + rad * Math.cos(angle(v)), cy + rad * Math.sin(angle(v))];
+    const active = value == null ? null : zoneOf(cfg, value);
+    const svg = el("svg", { viewBox: `0 0 ${W} ${Hh}`, role: "img",
+      "aria-label": value == null ? `${title}: no reading` : `${title} ${display(value)}${unitLabel}, ${active.label}` + (outside != null ? `. Outside ${display(outside)}${unitLabel}` : "") });
+
+    // track
+    const arc = (a, b, rad) => {
+      const [x1, y1] = pt(a, rad), [x2, y2] = pt(b, rad);
+      const large = (frac(b) - frac(a)) * SWEEP > 180 ? 1 : 0;
+      return `M${x1.toFixed(2)},${y1.toFixed(2)} A${rad},${rad} 0 ${large} 1 ${x2.toFixed(2)},${y2.toFixed(2)}`;
+    };
+    svg.append(el("path", { d: arc(cfg.min, cfg.max, r), fill: "none", stroke: "rgb(255 255 255 / 0.10)", "stroke-width": thick + 6, "stroke-linecap": "round" }));
+    const gap = (cfg.max - cfg.min) * 0.006;
+    cfg.zones.forEach((z, i) => {
+      const a = z.from + (i ? gap : 0), b = z.to - (i < cfg.zones.length - 1 ? gap : 0);
+      svg.append(el("path", { d: arc(a, b, r), fill: "none", stroke: statusColor(z.status), "stroke-width": thick,
+        "stroke-linecap": i === 0 || i === cfg.zones.length - 1 ? "round" : "butt",
+        opacity: active && active !== z ? 0.32 : 1 }));
+    });
+    // threshold labels
+    for (const v of cfg.ticks) {
+      const [lx, ly] = pt(v, r + thick / 2 + 14);
+      const f = frac(v);
+      svg.append(el("text", { x: lx, y: ly + 4, "text-anchor": f < 0.4 ? "end" : f > 0.6 ? "start" : "middle", class: "tick" }, tickLabel(v)));
+    }
+    // outside marker: small triangle just outside the ring, pointing in
+    if (outside != null) {
+      const a = angle(outside), ro = r + thick / 2 + 3, rt = r + thick / 2 + 11;
+      const tip = [cx + ro * Math.cos(a), cy + ro * Math.sin(a)];
+      const n = [-Math.sin(a), Math.cos(a)];
+      const base = [cx + rt * Math.cos(a), cy + rt * Math.sin(a)];
+      const p1 = [base[0] + n[0] * 5, base[1] + n[1] * 5], p2 = [base[0] - n[0] * 5, base[1] - n[1] * 5];
+      svg.append(el("polygon", { points: `${tip.join(",")} ${p1.join(",")} ${p2.join(",")}`, fill: "var(--outside)", stroke: "rgb(0 0 0 / 0.35)", "stroke-width": 1 }));
+    }
+    // inside knob
+    if (value != null) {
+      const [mx, my] = pt(value, r);
+      svg.append(el("circle", { cx: mx, cy: my, r: 10, fill: "#fff", stroke: "rgb(0 0 0 / 0.35)", "stroke-width": 1.5 }));
+      svg.append(el("circle", { cx: mx, cy: my, r: 4, fill: statusColor(active.status) }));
+      const big = el("text", { x: cx, y: cy + 8, "text-anchor": "middle", style: "font-size:46px;font-weight:600;fill:#fff;letter-spacing:-0.03em;font-variant-numeric:tabular-nums" }, display(value));
+      big.append(el("tspan", { style: "font-size:20px;font-weight:500;fill:rgb(255 255 255 / 0.7)", dx: "2" }, unitLabel));
       svg.append(big);
-      svg.append(el("text", { x: cx, y: cy - 2, "text-anchor": "middle", class: "tick" }, "relative humidity"));
+      svg.append(el("text", { x: cx, y: cy + 30, "text-anchor": "middle", class: "tick", style: "font-size:12px" }, "Inside"));
     } else {
-      svg.append(el("text", { x: cx, y: cy - 30, "text-anchor": "middle", class: "tick" }, "No reading"));
+      svg.append(el("text", { x: cx, y: cy + 6, "text-anchor": "middle", class: "tick", style: "font-size:13px" }, "No reading"));
     }
     return svg;
   }
 
-  function zoneBar(hums) {
+  function zoneBar(cfg, values) {
     const wrap = el("div", { class: "zones" });
-    wrap.append(el("div", { class: "hint" }, `Time in each zone · ${rangeName()}`));
+    wrap.append(el("div", { class: "cap" }, `Time in each zone · ${rangeName().toLowerCase()}`));
     const bar = el("div", { class: "bar", role: "img" });
     const legend = el("div", { class: "legend" });
-    const counts = ZONES.map((z) => hums.filter((h) => zoneOf(h) === z).length);
-    const total = hums.length;
+    const total = values.length;
     const parts = [];
-    ZONES.forEach((z, i) => {
-      const pct = total ? (counts[i] / total) * 100 : 0;
-      if (pct > 0) bar.append(el("span", { style: `flex:${pct} 1 0;background:var(--${z.status})`, title: `${z.label}: ${Math.round(pct)}%` }));
+    cfg.zones.forEach((z) => {
+      const n = values.filter((v) => zoneOf(cfg, v) === z).length;
+      const pct = total ? (n / total) * 100 : 0;
+      if (pct > 0) bar.append(el("span", { style: `flex:${pct} 1 0;background:${statusColor(z.status)}`, title: `${z.label}: ${Math.round(pct)}%` }));
       const item = el("div");
       item.append(el("b", {}, total ? `${Math.round(pct)}%` : "–"));
       const name = el("span");
-      name.append(el("span", { class: "swatch", style: `background:var(--${z.status})` }), document.createTextNode(z.label));
+      name.append(el("span", { class: "swatch", style: `background:${statusColor(z.status)}` }), document.createTextNode(z.label));
       item.append(name);
       legend.append(item);
       parts.push(`${z.label} ${Math.round(pct)}%`);
@@ -460,162 +577,224 @@
     return wrap;
   }
 
-  // ---- Line chart (one measure per chart, one line per room) -------------
-  function renderChart({ boxId, legendId, hintId, statsId, rows, pick, unit, title, epa }) {
-    const box = $(boxId);
+  // ---- Outside tile --------------------------------------------------------
+  function renderOutside() {
+    const box = $("outside");
     box.replaceChildren();
-    const series = state.rooms
-      .map((room) => ({ room, pts: rows.filter((r) => r.room === room && pick(r) != null).map((r) => ({ t: +r.t, v: pick(r) })) }))
-      .filter((s) => s.pts.length);
+    $("outPlace").textContent = CONFIG.place.name;
+    if (!state.wx) { box.append(el("div", { class: "empty" }, "Outside weather unavailable right now.")); return; }
+    const w = state.wx.now, c = condition(w.code, w.day);
+    const head = el("div", { class: "tile-head" });
+    head.append(el("span", { class: "tile-ico out", "aria-hidden": "true" }, c.icon));
+    const ht = el("div");
+    ht.append(el("div", { class: "tile-title" }, CONFIG.place.name), el("div", { class: "tile-sub" }, `Live · updated ${ago(w.t)}`));
+    head.append(ht);
+    const now = el("div", { class: "out-now" });
+    now.append(el("span", { class: "big" }, fmt0(toUnit(w.tempF)) + "°"), el("span", { class: "cond" }, c.text));
+    const facts = el("div", { class: "out-facts" });
+    for (const [k, v] of [["Humidity", fmt0(w.hum) + "%"], ["Feels like", fmt0(toUnit(w.feelsF)) + "°"], ["Humidity zone", zoneOf(HUM, w.hum).label]]) {
+      const d = el("div"); d.append(el("b", {}, v), document.createTextNode(k)); facts.append(d);
+    }
+    box.append(head, now, facts);
 
-    // legend: rooms (when more than one) + reference marks
-    const legend = $(legendId);
-    legend.replaceChildren();
-    if (series.length > 1) {
-      for (const s of series) {
-        const sp = el("span");
-        sp.append(roomKey(s.room), document.createTextNode(s.room));
-        legend.append(sp);
+    // inside vs outside, for the first room
+    const room = state.rooms[0];
+    if (room) {
+      const lt = lastOf(room, "tempF"), lh = lastOf(room, "hum");
+      const bits = [];
+      if (lt) {
+        const d = toUnit(lt.tempF) - toUnit(w.tempF);
+        bits.push(Math.abs(d) < 0.5 ? "about the same temperature" : `<b>${fmt1(Math.abs(d))}°</b> ${d < 0 ? "cooler" : "warmer"}`);
+      }
+      if (lh) {
+        const d = lh.hum - w.hum;
+        bits.push(Math.abs(d) < 1 ? "about as humid" : `<b>${fmt0(Math.abs(d))}%</b> ${d < 0 ? "less humid" : "more humid"}`);
+      }
+      if (bits.length) {
+        const diff = el("div", { class: "diff" });
+        diff.innerHTML = `${escapeHtml(room)} is ${bits.join(" and ")} than outside.`;
+        box.append(diff);
       }
     }
-    if (epa) {
-      const b = el("span"); b.append(el("span", { class: "bandkey" }), document.createTextNode("EPA ideal 30–50%"));
-      const l = el("span"); l.append(el("span", { class: "ref" }), document.createTextNode("EPA limit 60% (mold risk above)"));
-      legend.append(b, l);
-    }
+  }
+  const escapeHtml = (s) => s.replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 
-    const all = series.flatMap((s) => s.pts);
-    const stats = $(statsId);
-    stats.replaceChildren();
-    if (!all.length) {
-      box.append(el("div", { class: "empty" }, "No readings in this range yet."));
-      $(hintId).textContent = "";
-      return;
-    }
+  // ---- Combined chart: temperature panel + humidity panel, one time axis -----
+  function renderChart(rows) {
+    const box = $("chart");
+    box.replaceChildren();
+    const start = rangeStart();
+    const wxRows = state.wx ? state.wx.hourly.filter((r) => r.t >= start) : [];
 
-    const W = Math.max(box.clientWidth, 280), H = 220;
-    const m = { l: 36, r: 12, t: 12, b: 26 };
-    const iw = W - m.l - m.r, ih = H - m.t - m.b;
+    const multi = state.rooms.length > 1;
+    const mk = (measure, pick) => {
+      const s = state.rooms.map((room) => ({
+        name: multi ? room : "Inside", color: roomColor(room, measure), dash: false,
+        pts: rows.filter((r) => r.room === room && pick(r) != null).map((r) => ({ t: +r.t, v: pick(r) })),
+      })).filter((x) => x.pts.length);
+      const outPts = wxRows.filter((r) => pick(r) != null).map((r) => ({ t: r.t, v: pick(r) }));
+      if (outPts.length) s.push({ name: "Outside", color: "var(--outside)", dash: true, outside: true, pts: outPts });
+      return s;
+    };
+    const tempSeries = mk("temp", (r) => toUnit(r.tempF));
+    const humSeries = mk("hum", (r) => r.hum);
+
+    // legend
+    const legend = $("legend");
+    legend.replaceChildren();
+    const lg = (cls, style, text) => { const s = el("span"); s.append(el("span", { class: cls, style }), document.createTextNode(text)); legend.append(s); };
+    if (multi) state.rooms.forEach((room) => lg("lk", `border-color:${roomColor(room)}`, room));
+    else { lg("lk", "border-color:var(--temp)", "Inside temp"); lg("lk", "border-color:var(--hum)", "Inside humidity"); }
+    if (state.wx) lg("lk dash", "border-color:var(--outside)", `Outside (${CONFIG.place.name})`);
+    lg("bandkey", "", "EPA ideal 30–50%");
+    lg("lk dash", "border-color:var(--critical)", "EPA 60% limit");
+
+    const all = [...tempSeries, ...humSeries].flatMap((s) => s.pts);
+    $("stats").replaceChildren();
+    if (!all.length) { box.append(el("div", { class: "empty" }, "No readings in this range yet.")); return; }
+
+    const W = Math.max(box.clientWidth, 290);
+    const m = { l: 40, r: 14 };
+    const panelH = 150, titleH = 18, gapH = 26, axisH = 24;
+    const p1 = { top: titleH, h: panelH };
+    const p2 = { top: titleH + panelH + gapH + titleH, h: panelH };
+    const Ht = p2.top + p2.h + axisH;
+    const iw = W - m.l - m.r;
 
     let t0 = Math.min(...all.map((p) => p.t)), t1 = Math.max(...all.map((p) => p.t));
-    if (state.range !== "all") t0 = Math.min(t0, rangeStart()), t1 = Math.max(t1, Date.now());
-    if (t1 - t0 < 3600e3) t0 = t1 - 3600e3;
-
-    const vals = all.map((p) => p.v);
-    let vMin, vMax, step;
-    if (epa) {
-      // always keep the EPA band and limit in view
-      step = 10;
-      vMin = Math.max(0, Math.min(20, Math.floor(Math.min(...vals) / 10) * 10));
-      vMax = Math.min(100, Math.max(70, Math.ceil(Math.max(...vals) / 10) * 10));
-    } else {
-      vMin = Math.min(...vals); vMax = Math.max(...vals);
-      const pad = Math.max((vMax - vMin) * 0.15, 1);
-      step = niceStep((vMax - vMin + 2 * pad) / 4);
-      vMin = Math.floor((vMin - pad) / step) * step;
-      vMax = Math.ceil((vMax + pad) / step) * step;
-    }
-
+    if (state.range !== "all") t0 = Math.min(t0, start), t1 = Math.max(t1, Date.now());
+    if (state.range === "all") { const firstRoom = Math.min(...[...tempSeries, ...humSeries].filter((s) => !s.outside).flatMap((s) => s.pts.map((p) => p.t)).concat([t1])); t0 = Math.max(t0, firstRoom - 6 * H); }
+    if (t1 - t0 < H) t0 = t1 - H;
     const x = (t) => m.l + ((t - t0) / (t1 - t0)) * iw;
-    const y = (v) => m.t + ih - ((v - vMin) / (vMax - vMin)) * ih;
 
-    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H, role: "img", tabindex: "0",
-      "aria-label": `${title} over time. Use arrow keys to step through readings.` });
+    const svg = el("svg", { viewBox: `0 0 ${W} ${Ht}`, height: Ht, role: "img", tabindex: "0",
+      "aria-label": "Temperature and humidity over time, inside and outside. Use arrow keys to step through readings." });
+    const defs = el("defs");
+    svg.append(defs);
 
-    // EPA reference band + limit line (drawn under the data)
-    if (epa) {
-      svg.append(el("rect", { x: m.l, y: y(EPA.idealHigh), width: iw, height: y(EPA.idealLow) - y(EPA.idealHigh), fill: "var(--band)" }));
+    // panel 1: temperature
+    const tv = tempSeries.flatMap((s) => s.pts.filter((p) => p.t >= t0).map((p) => p.v));
+    let tMin = Math.min(...tv), tMax = Math.max(...tv);
+    if (!isFinite(tMin)) { tMin = toUnit(70); tMax = toUnit(85); }
+    const tPad = Math.max((tMax - tMin) * 0.12, 1);
+    const tStep = niceStep((tMax - tMin + 2 * tPad) / 4);
+    tMin = Math.floor((tMin - tPad) / tStep) * tStep; tMax = Math.ceil((tMax + tPad) / tStep) * tStep;
+    const yT = (v) => p1.top + p1.h - ((v - tMin) / (tMax - tMin)) * p1.h;
+
+    // panel 2: humidity
+    const hv = humSeries.flatMap((s) => s.pts.filter((p) => p.t >= t0).map((p) => p.v));
+    const hMin = Math.max(0, Math.min(20, Math.floor(Math.min(...hv, 100) / 10) * 10));
+    const hMax = Math.min(100, Math.max(70, Math.ceil(Math.max(...hv, 0) / 10) * 10));
+    const yH = (v) => p2.top + p2.h - ((v - hMin) / (hMax - hMin)) * p2.h;
+
+    // titles
+    svg.append(el("text", { x: m.l, y: p1.top - 6, class: "ptitle" }, `Temperature (${deg()})`));
+    svg.append(el("text", { x: m.l, y: p2.top - 6, class: "ptitle" }, "Relative humidity (%)"));
+
+    // EPA band (under grid)
+    svg.append(el("rect", { x: m.l, y: yH(50), width: iw, height: yH(30) - yH(50), fill: "var(--band)", rx: 3 }));
+
+    // grids
+    for (let v = tMin; v <= tMax + 1e-9; v += tStep) {
+      svg.append(el("line", { x1: m.l, x2: W - m.r, y1: yT(v), y2: yT(v), stroke: v === tMin ? "var(--axis)" : "var(--grid)" }));
+      svg.append(el("text", { x: m.l - 7, y: yT(v) + 4, "text-anchor": "end", class: "tick" }, fmt1(v) + "°"));
     }
-
-    // grid + y ticks
-    for (let v = vMin; v <= vMax + 1e-9; v += step) {
-      svg.append(el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: v === vMin ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }));
-      svg.append(el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end", class: "tick" }, fmt1(v) + (unit === "%" ? "%" : "°")));
+    for (let v = hMin; v <= hMax + 1e-9; v += 10) {
+      svg.append(el("line", { x1: m.l, x2: W - m.r, y1: yH(v), y2: yH(v), stroke: v === hMin ? "var(--axis)" : "var(--grid)" }));
+      if ((v - hMin) % 20 === 0 || v === 60) svg.append(el("text", { x: m.l - 7, y: yH(v) + 4, "text-anchor": "end", class: "tick" }, v + "%"));
     }
-    // x ticks + day separators
+    svg.append(el("line", { x1: m.l, x2: W - m.r, y1: yH(60), y2: yH(60), stroke: "var(--critical)", "stroke-width": 1.5, "stroke-dasharray": "5 4" }));
+
+    // shared x axis (ticks under humidity panel, faint verticals through both)
     const xt = timeTicks(t0, t1, iw);
     for (const t of xt.ticks) {
-      svg.append(el("line", { x1: x(t), x2: x(t), y1: m.t + ih, y2: m.t + ih + 4, stroke: "var(--axis)", "stroke-width": 1 }));
-      svg.append(el("text", { x: x(t), y: H - 6, "text-anchor": "middle", class: "tick" }, xt.label(new Date(t))));
+      svg.append(el("line", { x1: x(t), x2: x(t), y1: p1.top, y2: p1.top + p1.h, stroke: "var(--grid)", "stroke-dasharray": "2 4" }));
+      svg.append(el("line", { x1: x(t), x2: x(t), y1: p2.top, y2: p2.top + p2.h, stroke: "var(--grid)", "stroke-dasharray": "2 4" }));
+      svg.append(el("text", { x: x(t), y: Ht - 6, "text-anchor": "middle", class: "tick" }, xt.label(new Date(t))));
     }
 
-    if (epa) {
-      svg.append(el("line", { x1: m.l, x2: W - m.r, y1: y(EPA.limit), y2: y(EPA.limit), stroke: "var(--critical)", "stroke-width": 1.5, "stroke-dasharray": "5 4" }));
-    }
-
-    // area fill for a single series
-    const gapLimit = gapThreshold(all);
-    const gid = "grad-" + boxId;
-    if (series.length === 1) {
-      const defs = el("defs");
-      const lg = el("linearGradient", { id: gid, x1: 0, y1: 0, x2: 0, y2: 1 });
-      lg.append(el("stop", { offset: "0%", "stop-color": color(series[0].room), "stop-opacity": 0.18 }),
-                el("stop", { offset: "100%", "stop-color": color(series[0].room), "stop-opacity": 0 }));
-      defs.append(lg);
-      svg.append(defs);
-      for (const run of runs(series[0].pts, gapLimit)) {
-        if (run.length < 2) continue;
-        let d = `M${x(run[0].t)},${y(vMin)}`;
-        for (const p of run) d += `L${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`;
-        d += `L${x(run[run.length - 1].t)},${y(vMin)}Z`;
-        svg.append(el("path", { d, fill: `url(#${gid})` }));
+    const roomPts = [...tempSeries, ...humSeries].filter((s) => !s.outside).flatMap((s) => s.pts);
+    const gapRoom = gapThreshold(roomPts);
+    const drawSeries = (series, y, base, gid) => {
+      for (const s of series) {
+        const pts = s.pts.filter((p) => p.t >= t0 - H);
+        const gap = s.outside ? 3 * H : gapRoom;
+        const runList = runs(pts, gap);
+        // soft area under the single inside line
+        if (!s.outside && !multi) {
+          const g = el("linearGradient", { id: gid, x1: 0, y1: 0, x2: 0, y2: 1 });
+          g.append(el("stop", { offset: "0%", "stop-color": s.color, "stop-opacity": 0.28 }), el("stop", { offset: "100%", "stop-color": s.color, "stop-opacity": 0 }));
+          defs.append(g);
+          for (const run of runList) {
+            if (run.length < 2) continue;
+            let d = `M${x(run[0].t)},${base}`;
+            for (const p of run) d += `L${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`;
+            svg.append(el("path", { d: d + `L${x(run[run.length - 1].t)},${base}Z`, fill: `url(#${gid})` }));
+          }
+        }
+        let d = "";
+        for (const run of runList) {
+          run.forEach((p, i) => { d += `${i ? "L" : "M"}${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`; });
+          if (run.length === 1 && !s.outside) svg.append(el("circle", { cx: x(run[0].t), cy: y(run[0].v), r: 3, fill: s.color }));
+        }
+        svg.append(el("path", { d, fill: "none", stroke: s.color, "stroke-width": s.outside ? 1.6 : 2.4,
+          "stroke-dasharray": s.outside ? "5 4" : "none", "stroke-linejoin": "round", "stroke-linecap": "round", opacity: s.outside ? 0.85 : 1 }));
+        if (!s.outside && pts.length) {
+          const last = pts[pts.length - 1];
+          svg.append(el("circle", { cx: x(last.t), cy: y(last.v), r: 4.5, fill: s.color, stroke: "#fff", "stroke-width": 2 }));
+        }
       }
-    }
+    };
+    drawSeries(tempSeries, yT, p1.top + p1.h, "gT");
+    drawSeries(humSeries, yH, p2.top + p2.h, "gH");
 
-    // lines, broken across long gaps
-    for (const s of series) {
-      let d = "";
-      for (const run of runs(s.pts, gapLimit)) {
-        run.forEach((p, i) => { d += `${i ? "L" : "M"}${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`; });
-        if (run.length === 1) svg.append(el("circle", { cx: x(run[0].t), cy: y(run[0].v), r: 3, fill: color(s.room) }));
-      }
-      svg.append(el("path", { d, fill: "none", stroke: color(s.room), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-      const last = s.pts[s.pts.length - 1];
-      svg.append(el("circle", { cx: x(last.t), cy: y(last.v), r: 4.5, fill: color(s.room), stroke: "var(--surface-1)", "stroke-width": 2 }));
-    }
-
-    // hover layer: crosshair + tooltip
-    const cross = el("line", { y1: m.t, y2: m.t + ih, stroke: "var(--text-muted)", "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" });
+    // hover: one crosshair through both panels, one tooltip
+    const cross = el("line", { y1: p1.top, y2: p2.top + p2.h, stroke: "rgb(255 255 255 / 0.55)", "stroke-width": 1, visibility: "hidden" });
     const dots = el("g", { visibility: "hidden" });
     svg.append(cross, dots);
     box.append(svg);
     const tip = el("div", { class: "tip" });
     box.append(tip);
 
-    const times = [...new Set(all.map((p) => p.t))].sort((a, b) => a - b);
+    const times = [...new Set(all.filter((p) => p.t >= t0).map((p) => p.t))].sort((a, b) => a - b);
     let cursor = times.length - 1;
-
     function show(i) {
+      if (!times.length) return;
       cursor = Math.max(0, Math.min(times.length - 1, i));
-      const t = times[cursor];
-      const px = x(t);
+      const t = times[cursor], px = x(t);
       cross.setAttribute("x1", px); cross.setAttribute("x2", px); cross.setAttribute("visibility", "visible");
       dots.replaceChildren(); dots.setAttribute("visibility", "visible");
       tip.replaceChildren(el("div", { class: "t" }, new Date(t).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })));
-      for (const s of series) {
-        const p = nearest(s.pts, t);
-        if (!p || Math.abs(p.t - t) > gapLimit / 2) continue;
-        dots.append(el("circle", { cx: x(p.t), cy: y(p.v), r: 4.5, fill: color(s.room), stroke: "var(--surface-1)", "stroke-width": 2 }));
-        const row = el("div", { class: "row" });
-        row.append(el("span", { class: "key", style: `background:${color(s.room)}` }), el("strong", {}, fmt1(p.v) + unit));
-        if (series.length > 1) row.append(el("span", { class: "nm" }, s.room));
-        if (epa) row.append(el("span", { class: "nm" }, "· " + zoneOf(p.v).label));
-        tip.append(row);
-      }
+      const block = (series, y, u, label) => {
+        let any = false;
+        for (const s of series) {
+          const p = nearest(s.pts, t);
+          if (!p || Math.abs(p.t - t) > (s.outside ? 40 * 60e3 : gapRoom / 2)) continue;
+          any = true;
+          dots.append(el("circle", { cx: x(p.t), cy: y(p.v), r: 4.5, fill: s.color, stroke: "#fff", "stroke-width": 2 }));
+          const row = el("div", { class: "row" });
+          row.append(el("span", { class: s.outside ? "lk dash" : "lk", style: `border-color:${s.color};width:12px` }),
+            el("span", { class: "nm" }, `${s.name} ${label}`), el("strong", {}, (u === "%" ? fmt0(p.v) : fmt1(p.v)) + u));
+          tip.append(row);
+        }
+        return any;
+      };
+      const a = block(tempSeries, yT, "°", "temp");
+      if (a) tip.append(el("div", { class: "sep" }));
+      const b = block(humSeries, yH, "%", "humidity");
+      if (a && !b) tip.lastChild.remove();
       tip.style.display = "block";
-      const scale = box.clientWidth / W;
-      const left = px * scale, tw = tip.offsetWidth;
-      tip.style.left = Math.max(0, Math.min(box.clientWidth - tw, left + (left > box.clientWidth / 2 ? -tw - 12 : 12))) + "px";
-      tip.style.top = "8px";
+      const scale = box.clientWidth / W, left = px * scale, tw = tip.offsetWidth;
+      tip.style.left = Math.max(0, Math.min(box.clientWidth - tw, left + (left > box.clientWidth / 2 ? -tw - 14 : 14))) + "px";
+      tip.style.top = "20px";
     }
     function hide() { cross.setAttribute("visibility", "hidden"); dots.setAttribute("visibility", "hidden"); tip.style.display = "none"; }
-
     svg.addEventListener("pointermove", (e) => {
-      const r = svg.getBoundingClientRect();
-      const t = t0 + (((e.clientX - r.left) * (W / r.width) - m.l) / iw) * (t1 - t0);
-      let best = 0;
-      for (let i = 1; i < times.length; i++) if (Math.abs(times[i] - t) < Math.abs(times[best] - t)) best = i;
-      show(best);
+      const rct = svg.getBoundingClientRect();
+      const t = t0 + (((e.clientX - rct.left) * (W / rct.width) - m.l) / iw) * (t1 - t0);
+      let lo = 0, hi = times.length - 1;
+      while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (times[mid] < t) lo = mid; else hi = mid; }
+      show(Math.abs(times[lo] - t) <= Math.abs(times[hi] - t) ? lo : hi);
     });
     svg.addEventListener("pointerleave", hide);
     svg.addEventListener("blur", hide);
@@ -626,24 +805,29 @@
       if (e.key === "Escape") hide();
     });
 
-    // summary stats under the chart
-    const statItems = [["Average", fmt1(avg(vals)) + unit], ["Low", fmt1(Math.min(...vals)) + unit], ["High", fmt1(Math.max(...vals)) + unit], ["Readings", String(vals.length)]];
-    if (epa) statItems.splice(3, 0, ["Above 60%", Math.round((vals.filter((v) => v >= EPA.limit).length / vals.length) * 100) + "%"]);
-    for (const [k, v] of statItems) { const d = el("div"); d.append(el("b", {}, v), document.createTextNode(k)); stats.append(d); }
-    $(hintId).textContent = rangeName();
+    // stats
+    const inT = tempSeries.filter((s) => !s.outside).flatMap((s) => s.pts.map((p) => p.v));
+    const inH = humSeries.filter((s) => !s.outside).flatMap((s) => s.pts.map((p) => p.v));
+    const outT = tempSeries.filter((s) => s.outside).flatMap((s) => s.pts.map((p) => p.v));
+    const outH = humSeries.filter((s) => s.outside).flatMap((s) => s.pts.map((p) => p.v));
+    const items = [
+      ["Avg inside temp", inT.length ? fmt1(avg(inT)) + "°" : "–"],
+      ["Avg outside temp", outT.length ? fmt1(avg(outT)) + "°" : "–"],
+      ["Avg inside humidity", inH.length ? fmt0(avg(inH)) + "%" : "–"],
+      ["Avg outside humidity", outH.length ? fmt0(avg(outH)) + "%" : "–"],
+      ["Inside above 60%", inH.length ? fmt0((inH.filter((v) => v >= 60).length / inH.length) * 100) + "%" : "–"],
+    ];
+    for (const [k, v] of items) { const d = el("div"); d.append(el("b", {}, v), document.createTextNode(k)); $("stats").append(d); }
   }
 
   function runs(pts, gapLimit) {
-    const out = [];
-    let cur = [];
-    pts.forEach((p, i) => {
-      if (i && p.t - pts[i - 1].t > gapLimit) { out.push(cur); cur = []; }
-      cur.push(p);
-    });
+    const out = []; let cur = [];
+    pts.forEach((p, i) => { if (i && p.t - pts[i - 1].t > gapLimit) { out.push(cur); cur = []; } cur.push(p); });
     if (cur.length) out.push(cur);
     return out;
   }
   function nearest(pts, t) {
+    if (!pts.length) return null;
     let lo = 0, hi = pts.length - 1;
     while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (pts[mid].t < t) lo = mid; else hi = mid; }
     return Math.abs(pts[lo].t - t) <= Math.abs(pts[hi].t - t) ? pts[lo] : pts[hi];
@@ -651,29 +835,26 @@
   function gapThreshold(pts) {
     const ts = [...new Set(pts.map((p) => p.t))].sort((a, b) => a - b);
     const diffs = ts.slice(1).map((t, i) => t - ts[i]).sort((a, b) => a - b);
-    const median = diffs.length ? diffs[diffs.length >> 1] : 3600e3;
-    return Math.max(median * 3, 4 * 3600e3);
+    const median = diffs.length ? diffs[diffs.length >> 1] : H;
+    return Math.max(median * 3, 4 * H);
   }
   function niceStep(raw) {
     const p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
     return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
   }
   function timeTicks(t0, t1, width) {
-    const span = t1 - t0, H = 3600e3, D = 24 * H;
-    const target = Math.max(3, Math.floor(width / 70));
-    const steps = [H, 2 * H, 3 * H, 4 * H, 6 * H, 12 * H, D, 2 * D, 7 * D, 14 * D, 30 * D, 91 * D];
-    const step = steps.find((s) => span / s <= target) || 182 * D;
-    const ticks = [];
+    const span = t1 - t0, target = Math.max(3, Math.floor(width / 72));
+    const steps = [H, 2 * H, 3 * H, 4 * H, 6 * H, 12 * H, D, 2 * D, 7 * D, 14 * D, 30 * D];
+    const step = steps.find((s) => span / s <= target) || 61 * D;
     const first = new Date(t0);
-    if (step >= D) first.setHours(0, 0, 0, 0); else first.setHours(Math.ceil(first.getHours() / (step / H)) * (step / H), 0, 0, 0);
+    if (step >= D) { first.setHours(0, 0, 0, 0); first.setDate(first.getDate() + 1); }
+    else first.setHours(Math.ceil((first.getHours() + 0.01) / (step / H)) * (step / H), 0, 0, 0);
+    const ticks = [];
     for (let t = +first; t <= t1; t += step) if (t >= t0) ticks.push(t);
-    const label = step < D
-      ? (d) => d.toLocaleTimeString([], { hour: "numeric" })
-      : (d) => d.toLocaleDateString([], { month: "short", day: "numeric" });
+    const label = step < D ? (d) => d.toLocaleTimeString([], { hour: "numeric" }) : (d) => d.toLocaleDateString([], { month: "short", day: "numeric" });
     return { ticks, label };
   }
 
-  // ---- Table --------------------------------------------------------------
   function renderTable(rows) {
     const body = $("rows");
     body.replaceChildren();
@@ -682,8 +863,8 @@
       tr.append(
         el("td", {}, r.t.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })),
         el("td", {}, r.room),
-        el("td", { class: "num" }, r.tempF == null ? "–" : fmt1(toUnit(r.tempF)) + "°" + state.unit),
-        el("td", { class: "num" }, r.hum == null ? "–" : `${fmt1(r.hum)}% · ${zoneOf(r.hum).label}`),
+        el("td", { class: "num" }, r.tempF == null ? "–" : fmt1(toUnit(r.tempF)) + deg()),
+        el("td", { class: "num" }, r.hum == null ? "–" : `${fmt0(r.hum)}% · ${zoneOf(HUM, r.hum).label}`),
       );
       body.append(tr);
     }
@@ -691,32 +872,20 @@
 
   // ---- Wiring -------------------------------------------------------------
   function render() {
-    const start = rangeStart();
-    const rows = state.rows.filter((r) => +r.t >= start);
-    renderTiles(rows);
-    renderGauges(rows);
-    renderChart({ boxId: "chartH", legendId: "legendH", hintId: "humHint", statsId: "statsH", rows, pick: (r) => r.hum, unit: "%", title: "Relative humidity", epa: true });
-    renderChart({ boxId: "chartT", legendId: "legendT", hintId: "tempHint", statsId: "statsT", rows, pick: (r) => toUnit(r.tempF), unit: "°" + state.unit, title: "Temperature" });
+    const rows = state.rows.filter((r) => +r.t >= rangeStart());
+    renderPills();
+    renderRooms(rows);
+    renderOutside();
+    renderChart(rows);
     renderTable(rows);
+    $("rangeLabel").textContent = rangeName();
     const last = state.rows[state.rows.length - 1];
     const checked = state.lastFetch ? ` · checked ${state.lastFetch.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : "";
     $("updated").textContent = (last ? `Last reading ${ago(last.t)}` : "No readings yet") + checked;
   }
-
-  function notice(html) { $("notice").innerHTML = html ? `<div class="notice">${html}</div>` : ""; }
-
-  async function fetchCsv() {
-    let lastErr = null;
-    for (const src of sources()) {
-      try {
-        const url = src.url + (src.url.includes("?") ? "&" : "?") + "t=" + Date.now();
-        const res = await fetch(url, { cache: "no-store", headers: src.headers || {} });
-        if (res.status === 404) { lastErr = 404; continue; }
-        if (!res.ok) { lastErr = res.status; continue; }
-        return await res.text();
-      } catch (e) { lastErr = e; }
-    }
-    throw lastErr;
+  function notice(text) {
+    $("notice").replaceChildren();
+    if (text) $("notice").append(el("div", { class: "notice glass" }, text));
   }
 
   let loading = false;
@@ -724,28 +893,22 @@
     if (loading) return;
     loading = true;
     const btn = $("refresh");
-    btn.disabled = true; btn.classList.add("spin"); btn.querySelector("span").textContent = "Refreshing…";
+    btn.classList.add("spin"); btn.disabled = true;
     try {
-      if (!sources().length) {
-        $("updated").textContent = "Not connected";
-        notice("Can't tell which repository to read from. Open this page from its GitHub Pages address, or set <code>CONFIG.repo</code> in index.html.");
-        return;
-      }
-      try {
-        state.rows = parse(await fetchCsv());
-        notice("");
-      } catch (e) {
-        if (e === 404) { state.rows = []; notice("No readings yet. Once the HomePod sends its first reading, it will show up here."); }
-        else notice("Couldn't load readings right now. Tap Refresh to try again.");
-      }
+      const [csv, wx] = await Promise.allSettled([csvSources().length ? fetchCsv() : Promise.reject("norepo"), fetchWeather()]);
+      if (csv.status === "fulfilled") { state.rows = parse(csv.value); notice(""); }
+      else if (csv.reason === "norepo") notice("Can't tell which repository to read from. Open this page from its GitHub Pages address, or set CONFIG.repo in index.html.");
+      else if (csv.reason === 404) { state.rows = []; notice("No readings yet. Once the HomePod sends its first reading, it will show up here."); }
+      else notice("Couldn't load room readings right now. Tap refresh to try again.");
+      if (wx.status === "fulfilled") state.wx = wx.value;
       state.lastFetch = new Date();
       const seen = [];
       for (const r of state.rows) if (!seen.includes(r.room)) seen.push(r.room);
-      state.rooms = seen; // first-seen order keeps each room's color stable
+      state.rooms = seen;
     } finally {
       render();
       loading = false;
-      btn.disabled = false; btn.classList.remove("spin"); btn.querySelector("span").textContent = "Refresh";
+      btn.classList.remove("spin"); btn.disabled = false;
     }
   }
 
@@ -755,15 +918,13 @@
     seg.addEventListener("click", (e) => {
       const b = e.target.closest("button");
       if (!b) return;
-      state[key] = b.dataset.v;
-      sync(); after && after(); render();
+      state[key] = b.dataset.v; sync(); after && after(); render();
     });
     sync();
   }
   bindSeg("range", "range");
   bindSeg("units", "unit", () => { try { localStorage.setItem("climate-unit", state.unit); } catch (e) {} });
   $("refresh").addEventListener("click", load);
-
   let resizeTimer;
   addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
   document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
