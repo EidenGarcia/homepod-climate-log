@@ -18,7 +18,10 @@
     --accent: #2a78d6;
     --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
     --series-5: #e87ba4; --series-6: #008300; --series-7: #6250d6; --series-8: #e34948;
-    --warn-bg: #fff6e0; --warn-text: #6b4a00;
+    --good: #0ca30c; --warning: #fab219; --critical: #d03b3b; --neutral: #9a9992; --neutral-ink: #5f5e59;
+    --good-ink: #0a7a0a; --warning-ink: #8a5a00; --critical-ink: #b42f2f;
+    --band: rgb(12 163 12 / 0.07);
+    --notice-bg: #fff6e0; --notice-text: #6b4a00;
   }
   @media (prefers-color-scheme: dark) {
     :root {
@@ -34,7 +37,10 @@
       --accent: #3987e5;
       --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
       --series-5: #d55181; --series-6: #0ca30c; --series-7: #9085e9; --series-8: #e66767;
-      --warn-bg: #2e2510; --warn-text: #f0d48a;
+      --neutral: #6f6e68; --neutral-ink: #b4b3ab;
+      --good-ink: #3fc23f; --warning-ink: #fab219; --critical-ink: #ef7272;
+      --band: rgb(12 163 12 / 0.10);
+      --notice-bg: #2e2510; --notice-text: #f0d48a;
     }
   }
   * { box-sizing: border-box; }
@@ -43,10 +49,21 @@
     font: 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
-  main { max-width: 880px; margin: 0 auto; padding: 20px 16px 48px; }
-  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
-  h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
-  #updated { color: var(--text-secondary); font-size: 13px; }
+  main { max-width: 920px; margin: 0 auto; padding: 20px 16px 48px; }
+  header { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  .title h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
+  .title p { margin: 2px 0 0; color: var(--text-secondary); font-size: 13px; }
+  .refresh {
+    appearance: none; display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+    background: var(--surface-1); color: var(--text-primary); border: 1px solid var(--border);
+    border-radius: 10px; padding: 7px 12px; font: inherit; font-size: 13px; font-weight: 600; min-height: 36px;
+  }
+  .refresh:hover { border-color: var(--axis); }
+  .refresh:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .refresh svg { width: 15px; height: 15px; }
+  .refresh.spin svg { animation: spin 0.8s linear infinite; }
+  .refresh[disabled] { opacity: 0.7; cursor: default; }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
   .controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
   .seg { display: inline-flex; background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 2px; }
@@ -57,24 +74,63 @@
   .seg button[aria-pressed="true"] { background: var(--surface-0); color: var(--text-primary); font-weight: 600; box-shadow: 0 0 0 1px var(--border); }
   .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 16px; margin-top: 12px; }
+  .card h2 { font-size: 15px; margin: 0; font-weight: 600; }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .hint { font-size: 12px; color: var(--text-muted); }
+  .eyebrow { font-size: 12px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 600; }
+
+  /* KPI tiles */
   .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
   .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
   .tile .label { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
-  .tile .value { font-size: 40px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin-top: 4px; font-variant-numeric: tabular-nums; }
-  .tile .value small { font-size: 20px; font-weight: 500; color: var(--text-secondary); margin-left: 2px; }
-  .tile .sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
-  .key { width: 12px; height: 2px; border-radius: 1px; display: inline-block; }
+  .tile .value { font-size: 38px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tile .value small { font-size: 18px; font-weight: 500; color: var(--text-secondary); margin-left: 2px; }
+  .tile .sub { font-size: 12px; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .key { width: 12px; height: 2px; border-radius: 1px; display: inline-block; flex: none; }
 
-  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px 8px; margin-top: 12px; }
-  .card h2 { font-size: 15px; margin: 0; font-weight: 600; }
-  .card .hint { font-size: 12px; color: var(--text-muted); }
-  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
-  .legend span { display: inline-flex; align-items: center; gap: 6px; }
-  .chart { position: relative; margin-top: 6px; touch-action: pan-y; }
+  /* Status badge: icon + label, never color alone */
+  .badge { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; padding: 3px 8px 3px 6px; border-radius: 999px; border: 1px solid var(--border); background: var(--surface-0); }
+  .badge .dot { width: 14px; height: 14px; border-radius: 50%; display: inline-grid; place-items: center; color: #fff; font-size: 10px; font-weight: 800; line-height: 1; }
+  .badge.good { color: var(--good-ink); } .badge.good .dot { background: var(--good); }
+  .badge.warning { color: var(--warning-ink); } .badge.warning .dot { background: var(--warning); color: #3a2a00; }
+  .badge.critical { color: var(--critical-ink); } .badge.critical .dot { background: var(--critical); }
+  .badge.neutral { color: var(--neutral-ink); } .badge.neutral .dot { background: var(--neutral); }
+
+  /* EPA gauge */
+  .gauges { display: grid; grid-template-columns: repeat(auto-fit, minmax(270px, 1fr)); gap: 18px; margin-top: 12px; }
+  .gauge { text-align: center; }
+  .gauge-room { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+  .gauge svg { width: 100%; max-width: 300px; display: block; margin: 0 auto; overflow: visible; }
+  .gauge .verdict { margin-top: 6px; }
+  .gauge .verdict-text { font-size: 13px; color: var(--text-secondary); margin-top: 6px; }
+  .zones { margin-top: 14px; text-align: left; }
+  .zones .bar { display: flex; height: 10px; gap: 2px; margin-top: 6px; }
+  .zones .bar span { border-radius: 2px; min-width: 0; }
+  .zones .bar span:first-child { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
+  .zones .bar span:last-child { border-top-right-radius: 4px; border-bottom-right-radius: 4px; }
+  .zones .legend { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; margin-top: 8px; font-size: 12px; }
+  .zones .legend div { display: flex; flex-direction: column; gap: 1px; }
+  .zones .legend b { font-size: 14px; font-variant-numeric: tabular-nums; color: var(--text-primary); }
+  .zones .legend span { color: var(--text-secondary); display: flex; align-items: center; gap: 5px; }
+  .swatch { width: 8px; height: 8px; border-radius: 2px; flex: none; }
+  .source { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--grid); font-size: 12px; color: var(--text-secondary); }
+  .source a { color: var(--accent); text-decoration: none; }
+  .source a:hover { text-decoration: underline; }
+
+  /* Charts */
+  .legend-row { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-top: 8px; }
+  .legend-row span { display: inline-flex; align-items: center; gap: 6px; }
+  .legend-row .ref { width: 14px; height: 0; border-top: 1.5px dashed var(--critical); }
+  .legend-row .bandkey { width: 14px; height: 10px; background: var(--band); border: 1px solid rgb(12 163 12 / 0.35); border-radius: 2px; }
+  .chart { position: relative; margin-top: 8px; touch-action: pan-y; }
   .chart svg { display: block; width: 100%; overflow: visible; }
   .chart svg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
   .tick { font-size: 11px; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .reflabel { font-size: 10.5px; font-weight: 600; }
+  .stats { display: flex; gap: 20px; flex-wrap: wrap; margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--grid); }
+  .stats div { font-size: 12px; color: var(--text-secondary); }
+  .stats b { display: block; font-size: 15px; color: var(--text-primary); font-variant-numeric: tabular-nums; font-weight: 600; }
   .tip {
     position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border);
     border-radius: 10px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 16px rgb(0 0 0 / 0.12);
@@ -92,18 +148,26 @@
   th { color: var(--text-secondary); font-weight: 500; }
   td.num, th.num { text-align: right; }
 
-  .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-top: 12px; }
+  .notice { background: var(--notice-bg); color: var(--notice-text); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-top: 12px; }
   .notice code { font-size: 12px; }
   .empty { color: var(--text-muted); font-size: 13px; padding: 30px 0; text-align: center; }
-  footer { margin-top: 20px; font-size: 12px; color: var(--text-muted); }
+  footer { margin-top: 20px; font-size: 12px; color: var(--text-muted); line-height: 1.6; }
   footer a { color: var(--text-secondary); }
 </style>
 </head>
 <body>
 <main>
   <header>
-    <h1>Home Climate</h1>
-    <span id="updated">Loading…</span>
+    <div class="title">
+      <h1>Home Climate</h1>
+      <p id="updated">Loading…</p>
+    </div>
+    <button class="refresh" id="refresh" type="button" aria-label="Refresh readings">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M13.5 2.5v3h-3"/>
+      </svg>
+      <span>Refresh</span>
+    </button>
   </header>
 
   <div class="controls" role="toolbar" aria-label="Chart filters">
@@ -122,16 +186,33 @@
   <div id="notice"></div>
   <section class="tiles" id="tiles" aria-live="polite"></section>
 
-  <section class="card">
-    <div class="card-head"><h2>Temperature</h2><span class="hint" id="tempRange"></span></div>
-    <div class="legend" id="legendT"></div>
-    <div class="chart" id="chartT"></div>
+  <section class="card" aria-labelledby="epaTitle">
+    <div class="card-head">
+      <div>
+        <div class="eyebrow">Mold prevention</div>
+        <h2 id="epaTitle">Humidity vs. EPA guideline</h2>
+      </div>
+      <span class="hint">Keep below 60% · ideal 30–50%</span>
+    </div>
+    <div class="gauges" id="gauges"></div>
+    <div class="source">
+      Source: U.S. EPA, <a href="https://www.epa.gov/mold/brief-guide-mold-moisture-and-your-home" target="_blank" rel="noopener">A Brief Guide to Mold, Moisture and Your Home</a>.
+      The EPA advises keeping indoor humidity below 60%, ideally between 30% and 50%.
+    </div>
   </section>
 
   <section class="card">
-    <div class="card-head"><h2>Humidity</h2><span class="hint" id="humRange"></span></div>
-    <div class="legend" id="legendH"></div>
+    <div class="card-head"><h2>Relative humidity</h2><span class="hint" id="humHint"></span></div>
+    <div class="legend-row" id="legendH"></div>
     <div class="chart" id="chartH"></div>
+    <div class="stats" id="statsH"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Temperature</h2><span class="hint" id="tempHint"></span></div>
+    <div class="legend-row" id="legendT"></div>
+    <div class="chart" id="chartT"></div>
+    <div class="stats" id="statsT"></div>
   </section>
 
   <details>
@@ -142,7 +223,11 @@
     </table>
   </details>
 
-  <footer>Readings from the HomePod's built-in sensor, logged by GitHub Actions. Page refreshes every 5 minutes.</footer>
+  <footer>
+    Readings come from the HomePod's built-in sensor and are logged by GitHub Actions; the page also refreshes itself every 5 minutes.
+    The HomePod sensor is not a calibrated instrument, so treat values as trends. For a precise check, compare against a stand-alone hygrometer.<br>
+    Humidity reference: <a href="https://www.epa.gov/mold/brief-guide-mold-moisture-and-your-home" target="_blank" rel="noopener">EPA – A Brief Guide to Mold, Moisture and Your Home</a>.
+  </footer>
 </main>
 
 <script>
@@ -154,24 +239,42 @@
     file: "readings.csv",
     refreshMinutes: 5,
   };
+  // EPA: keep indoor RH below 60%, ideally 30-50%.
+  const EPA = { idealLow: 30, idealHigh: 50, limit: 60 };
+  const ZONES = [
+    { key: "dry",   from: 0,  to: 30,  label: "Dry",        status: "neutral",  icon: "–", text: "Below the EPA's ideal range. Air may feel dry." },
+    { key: "ideal", from: 30, to: 50,  label: "Ideal",      status: "good",     icon: "✓", text: "Inside the EPA's ideal 30–50% range." },
+    { key: "ok",    from: 50, to: 60,  label: "Acceptable", status: "warning",  icon: "!", text: "Below the 60% EPA limit, but above ideal. Keep an eye on it." },
+    { key: "risk",  from: 60, to: 100, label: "Mold risk",  status: "critical", icon: "▲", text: "Above the EPA's 60% limit. Mold can grow; dehumidify or ventilate." },
+  ];
   // -----------------------------------------------------------------------
 
   const $ = (id) => document.getElementById(id);
   const SLOTS = 8;
-  const state = { range: "24h", unit: "F", rows: [], rooms: [] };
+  const state = { range: "24h", unit: "F", rows: [], rooms: [], lastFetch: null };
   try { state.unit = localStorage.getItem("climate-unit") || "F"; } catch (e) {}
 
-  function csvUrl() {
+  function repoName() {
     const q = new URLSearchParams(location.search);
-    if (q.get("csv")) return q.get("csv");
     let repo = q.get("repo") || CONFIG.repo;
     if (!repo && location.hostname.endsWith(".github.io")) {
       const owner = location.hostname.split(".")[0];
       const seg = location.pathname.split("/").filter(Boolean)[0];
       repo = owner + "/" + (seg && !seg.includes(".") ? seg : location.hostname);
     }
-    if (!repo) return null;
-    return `https://raw.githubusercontent.com/${repo}/${CONFIG.branch}/${CONFIG.file}`;
+    return repo || null;
+  }
+  function sources() {
+    const q = new URLSearchParams(location.search);
+    if (q.get("csv")) return [{ url: q.get("csv") }];
+    const repo = repoName();
+    if (!repo) return [];
+    return [
+      // GitHub API: freshest copy (about 1 minute cache)
+      { url: `https://api.github.com/repos/${repo}/contents/${CONFIG.file}?ref=${CONFIG.branch}`, headers: { Accept: "application/vnd.github.raw+json" } },
+      // Fallback: raw file (about 5 minute cache)
+      { url: `https://raw.githubusercontent.com/${repo}/${CONFIG.branch}/${CONFIG.file}` },
+    ];
   }
 
   function parse(text) {
@@ -186,7 +289,7 @@
       const tv = c[ix("temperature")], hv = c[ix("humidity")];
       let temp = tv === "" || tv == null ? null : +tv;
       const unit = (c[ix("unit")] || "F").toUpperCase();
-      if (temp != null && unit === "C") temp = temp * 9 / 5 + 32; // store internally in °F
+      if (temp != null && unit === "C") temp = temp * 9 / 5 + 32; // stored internally in °F
       out.push({ t, room: c[ix("room")] || "HomePod", tempF: temp, hum: hv === "" || hv == null ? null : +hv });
     }
     return out.sort((a, b) => a.t - b.t);
@@ -195,11 +298,14 @@
   const toUnit = (f) => (f == null ? null : state.unit === "C" ? (f - 32) * 5 / 9 : f);
   const fmt1 = (v) => (v == null ? "–" : (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, ""));
   const color = (room) => `var(--series-${(state.rooms.indexOf(room) % SLOTS) + 1})`;
+  const zoneOf = (h) => ZONES.find((z) => h < z.to) || ZONES[ZONES.length - 1];
+  const avg = (a) => a.reduce((s, v) => s + v, 0) / a.length;
 
   function rangeStart() {
     const now = Date.now(), h = 3600e3;
     return { "24h": now - 24 * h, "7d": now - 7 * 24 * h, "30d": now - 30 * 24 * h, all: -Infinity }[state.range];
   }
+  const rangeName = () => ({ "24h": "last 24 h", "7d": "last 7 days", "30d": "last 30 days", all: "all time" }[state.range]);
 
   function ago(d) {
     const m = Math.round((Date.now() - d) / 60000);
@@ -210,15 +316,24 @@
     return `${Math.round(h / 24)} days ago`;
   }
 
+  const SVG_TAGS = new Set(["svg", "path", "line", "text", "circle", "rect", "g", "defs", "linearGradient", "stop", "polygon"]);
   function el(tag, attrs = {}, text) {
-    const svgTags = ["svg", "path", "line", "text", "circle", "rect", "g"];
-    const n = svgTags.includes(tag) ? document.createElementNS("http://www.w3.org/2000/svg", tag) : document.createElement(tag);
+    const n = SVG_TAGS.has(tag) ? document.createElementNS("http://www.w3.org/2000/svg", tag) : document.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
     if (text != null) n.textContent = text;
     return n;
   }
+  function badge(zone) {
+    const b = el("span", { class: `badge ${zone.status}` });
+    b.append(el("span", { class: "dot", "aria-hidden": "true" }, zone.icon), document.createTextNode(zone.label));
+    return b;
+  }
+  function roomKey(room) {
+    const s = el("span", { class: "key", style: `background:${color(room)}` });
+    return s;
+  }
 
-  // ---- Stat tiles --------------------------------------------------------
+  // ---- KPI tiles -----------------------------------------------------------
   function renderTiles(rows) {
     const box = $("tiles");
     box.replaceChildren();
@@ -234,88 +349,229 @@
       box.append(tile("Temperature" + label, lastT && fmt1(toUnit(lastT.tempF)), u,
         temps.length ? `Low ${fmt1(Math.min(...temps))} · High ${fmt1(Math.max(...temps))}` : "No readings in range", room));
       box.append(tile("Humidity" + label, lastH && fmt1(lastH.hum), "%",
-        hums.length ? `Low ${fmt1(Math.min(...hums))} · High ${fmt1(Math.max(...hums))}` : "No readings in range", room));
+        hums.length ? `Low ${fmt1(Math.min(...hums))} · High ${fmt1(Math.max(...hums))}` : "No readings in range", room,
+        lastH ? zoneOf(lastH.hum) : null));
     }
   }
-  function tile(label, value, unit, sub, room) {
+  function tile(label, value, unit, sub, room, zone) {
     const t = el("div", { class: "tile" });
     const l = el("div", { class: "label" });
-    if (state.rooms.length > 1) l.append(el("span", { class: "key", style: `background:${color(room)}` }));
+    if (state.rooms.length > 1) l.append(roomKey(room));
     l.append(document.createTextNode(label));
     const v = el("div", { class: "value" }, value ?? "–");
     if (value != null) v.append(el("small", {}, unit));
-    t.append(l, v, el("div", { class: "sub" }, sub));
+    t.append(l, v);
+    if (zone) { const z = el("div", { style: "margin-top:6px" }); z.append(badge(zone)); t.append(z); }
+    t.append(el("div", { class: "sub" }, sub));
     return t;
   }
 
+  // ---- EPA gauge -----------------------------------------------------------
+  function renderGauges(rows) {
+    const box = $("gauges");
+    box.replaceChildren();
+    for (const room of state.rooms) {
+      const last = [...state.rows].reverse().find((r) => r.room === room && r.hum != null);
+      const hums = rows.filter((r) => r.room === room && r.hum != null).map((r) => r.hum);
+      const g = el("div", { class: "gauge" });
+      if (state.rooms.length > 1) {
+        const rl = el("div", { class: "gauge-room" });
+        rl.append(roomKey(room), document.createTextNode(room));
+        g.append(rl);
+      }
+      g.append(gaugeSvg(last ? last.hum : null));
+      if (last) {
+        const z = zoneOf(last.hum);
+        const v = el("div", { class: "verdict" });
+        v.append(badge(z));
+        g.append(v, el("div", { class: "verdict-text" }, z.text));
+      } else {
+        g.append(el("div", { class: "verdict-text" }, "No humidity reading yet."));
+      }
+      g.append(zoneBar(hums));
+      box.append(g);
+    }
+    if (!state.rooms.length) box.append(el("div", { class: "empty" }, "No readings yet."));
+  }
+
+  function gaugeSvg(value) {
+    const W = 300, H = 178, cx = 150, cy = 150, r = 118, thick = 18;
+    const ang = (v) => Math.PI * (1 - v / 100);                 // 0% at left, 100% at right
+    const pt = (v, rad) => [cx + rad * Math.cos(ang(v)), cy - rad * Math.sin(ang(v))];
+    const active = value == null ? null : zoneOf(value);
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, role: "img",
+      "aria-label": value == null ? "Humidity gauge, no reading" : `Humidity ${fmt1(value)} percent, ${zoneOf(value).label}` });
+
+    // zone arcs, 2px gaps between them
+    const gapDeg = 0.9; // in % units
+    ZONES.forEach((z, i) => {
+      const a = z.from + (i ? gapDeg / 2 : 0), b = z.to - (i < ZONES.length - 1 ? gapDeg / 2 : 0);
+      const [x1, y1] = pt(a, r), [x2, y2] = pt(b, r);
+      svg.append(el("path", {
+        d: `M${x1},${y1} A${r},${r} 0 0 1 ${x2},${y2}`, fill: "none",
+        stroke: `var(--${z.status})`, "stroke-width": thick, "stroke-linecap": "butt",
+        opacity: active && active.key !== z.key ? 0.28 : 1,
+      }));
+    });
+    // threshold ticks + labels
+    for (const v of [0, 30, 50, 60, 100]) {
+      const [xa, ya] = pt(v, r + thick / 2 + 2), [xb, yb] = pt(v, r + thick / 2 + 7);
+      svg.append(el("line", { x1: xa, y1: ya, x2: xb, y2: yb, stroke: "var(--axis)", "stroke-width": 1 }));
+      const [lx, ly] = pt(v, r + thick / 2 + 17);
+      svg.append(el("text", { x: lx, y: ly + 4, "text-anchor": v < 40 ? "end" : v > 60 ? "start" : "middle", class: "tick" }, v + "%"));
+    }
+    if (value != null) {
+      const v = Math.max(0, Math.min(100, value));
+      // value marker on the arc
+      const [mx, my] = pt(v, r);
+      svg.append(el("circle", { cx: mx, cy: my, r: 8, fill: "var(--surface-1)", stroke: "var(--text-primary)", "stroke-width": 2.5 }));
+      const big = el("text", { x: cx, y: cy - 22, "text-anchor": "middle", style: "font-size:40px;font-weight:700;fill:var(--text-primary);font-variant-numeric:tabular-nums;letter-spacing:-0.02em" }, fmt1(value));
+      big.append(el("tspan", { style: "font-size:16px;font-weight:500;fill:var(--text-secondary)" }, "%"));
+      svg.append(big);
+      svg.append(el("text", { x: cx, y: cy - 2, "text-anchor": "middle", class: "tick" }, "relative humidity"));
+    } else {
+      svg.append(el("text", { x: cx, y: cy - 30, "text-anchor": "middle", class: "tick" }, "No reading"));
+    }
+    return svg;
+  }
+
+  function zoneBar(hums) {
+    const wrap = el("div", { class: "zones" });
+    wrap.append(el("div", { class: "hint" }, `Time in each zone · ${rangeName()}`));
+    const bar = el("div", { class: "bar", role: "img" });
+    const legend = el("div", { class: "legend" });
+    const counts = ZONES.map((z) => hums.filter((h) => zoneOf(h) === z).length);
+    const total = hums.length;
+    const parts = [];
+    ZONES.forEach((z, i) => {
+      const pct = total ? (counts[i] / total) * 100 : 0;
+      if (pct > 0) bar.append(el("span", { style: `flex:${pct} 1 0;background:var(--${z.status})`, title: `${z.label}: ${Math.round(pct)}%` }));
+      const item = el("div");
+      item.append(el("b", {}, total ? `${Math.round(pct)}%` : "–"));
+      const name = el("span");
+      name.append(el("span", { class: "swatch", style: `background:var(--${z.status})` }), document.createTextNode(z.label));
+      item.append(name);
+      legend.append(item);
+      parts.push(`${z.label} ${Math.round(pct)}%`);
+    });
+    if (!total) bar.append(el("span", { style: "flex:1;background:var(--grid)" }));
+    bar.setAttribute("aria-label", total ? `Share of readings: ${parts.join(", ")}` : "No readings in range");
+    wrap.append(bar, legend);
+    return wrap;
+  }
+
   // ---- Line chart (one measure per chart, one line per room) -------------
-  function renderChart(boxId, legendId, hintId, rows, pick, unit, decimals) {
+  function renderChart({ boxId, legendId, hintId, statsId, rows, pick, unit, title, epa }) {
     const box = $(boxId);
     box.replaceChildren();
     const series = state.rooms
       .map((room) => ({ room, pts: rows.filter((r) => r.room === room && pick(r) != null).map((r) => ({ t: +r.t, v: pick(r) })) }))
       .filter((s) => s.pts.length);
 
+    // legend: rooms (when more than one) + reference marks
     const legend = $(legendId);
     legend.replaceChildren();
     if (series.length > 1) {
       for (const s of series) {
         const sp = el("span");
-        sp.append(el("span", { class: "key", style: `background:${color(s.room)}` }), document.createTextNode(s.room));
+        sp.append(roomKey(s.room), document.createTextNode(s.room));
         legend.append(sp);
       }
     }
+    if (epa) {
+      const b = el("span"); b.append(el("span", { class: "bandkey" }), document.createTextNode("EPA ideal 30–50%"));
+      const l = el("span"); l.append(el("span", { class: "ref" }), document.createTextNode("EPA limit 60% (mold risk above)"));
+      legend.append(b, l);
+    }
 
     const all = series.flatMap((s) => s.pts);
-    if (!all.length) { box.append(el("div", { class: "empty" }, "No readings in this range yet.")); $(hintId).textContent = ""; return; }
+    const stats = $(statsId);
+    stats.replaceChildren();
+    if (!all.length) {
+      box.append(el("div", { class: "empty" }, "No readings in this range yet."));
+      $(hintId).textContent = "";
+      return;
+    }
 
-    const W = Math.max(box.clientWidth, 280), H = 200;
-    const m = { l: 34, r: 12, t: 10, b: 24 };
+    const W = Math.max(box.clientWidth, 280), H = 220;
+    const m = { l: 36, r: 12, t: 12, b: 26 };
     const iw = W - m.l - m.r, ih = H - m.t - m.b;
 
     let t0 = Math.min(...all.map((p) => p.t)), t1 = Math.max(...all.map((p) => p.t));
     if (state.range !== "all") t0 = Math.min(t0, rangeStart()), t1 = Math.max(t1, Date.now());
     if (t1 - t0 < 3600e3) t0 = t1 - 3600e3;
-    let vMin = Math.min(...all.map((p) => p.v)), vMax = Math.max(...all.map((p) => p.v));
-    const pad = Math.max((vMax - vMin) * 0.15, unit === "%" ? 3 : 1);
-    const step = niceStep((vMax - vMin + 2 * pad) / 4);
-    vMin = Math.floor((vMin - pad) / step) * step;
-    vMax = Math.ceil((vMax + pad) / step) * step;
+
+    const vals = all.map((p) => p.v);
+    let vMin, vMax, step;
+    if (epa) {
+      // always keep the EPA band and limit in view
+      step = 10;
+      vMin = Math.max(0, Math.min(20, Math.floor(Math.min(...vals) / 10) * 10));
+      vMax = Math.min(100, Math.max(70, Math.ceil(Math.max(...vals) / 10) * 10));
+    } else {
+      vMin = Math.min(...vals); vMax = Math.max(...vals);
+      const pad = Math.max((vMax - vMin) * 0.15, 1);
+      step = niceStep((vMax - vMin + 2 * pad) / 4);
+      vMin = Math.floor((vMin - pad) / step) * step;
+      vMax = Math.ceil((vMax + pad) / step) * step;
+    }
 
     const x = (t) => m.l + ((t - t0) / (t1 - t0)) * iw;
     const y = (v) => m.t + ih - ((v - vMin) / (vMax - vMin)) * ih;
 
     const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H, role: "img", tabindex: "0",
-      "aria-label": `${boxId === "chartT" ? "Temperature" : "Humidity"} over time. Use arrow keys to step through readings.` });
+      "aria-label": `${title} over time. Use arrow keys to step through readings.` });
+
+    // EPA reference band + limit line (drawn under the data)
+    if (epa) {
+      svg.append(el("rect", { x: m.l, y: y(EPA.idealHigh), width: iw, height: y(EPA.idealLow) - y(EPA.idealHigh), fill: "var(--band)" }));
+    }
 
     // grid + y ticks
     for (let v = vMin; v <= vMax + 1e-9; v += step) {
       svg.append(el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: v === vMin ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }));
-      svg.append(el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end", class: "tick" }, fmt1(v)));
+      svg.append(el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end", class: "tick" }, fmt1(v) + (unit === "%" ? "%" : "°")));
     }
-    // x ticks
+    // x ticks + day separators
     const xt = timeTicks(t0, t1, iw);
     for (const t of xt.ticks) {
+      svg.append(el("line", { x1: x(t), x2: x(t), y1: m.t + ih, y2: m.t + ih + 4, stroke: "var(--axis)", "stroke-width": 1 }));
       svg.append(el("text", { x: x(t), y: H - 6, "text-anchor": "middle", class: "tick" }, xt.label(new Date(t))));
     }
 
-    // lines, broken across long gaps
+    if (epa) {
+      svg.append(el("line", { x1: m.l, x2: W - m.r, y1: y(EPA.limit), y2: y(EPA.limit), stroke: "var(--critical)", "stroke-width": 1.5, "stroke-dasharray": "5 4" }));
+    }
+
+    // area fill for a single series
     const gapLimit = gapThreshold(all);
+    const gid = "grad-" + boxId;
+    if (series.length === 1) {
+      const defs = el("defs");
+      const lg = el("linearGradient", { id: gid, x1: 0, y1: 0, x2: 0, y2: 1 });
+      lg.append(el("stop", { offset: "0%", "stop-color": color(series[0].room), "stop-opacity": 0.18 }),
+                el("stop", { offset: "100%", "stop-color": color(series[0].room), "stop-opacity": 0 }));
+      defs.append(lg);
+      svg.append(defs);
+      for (const run of runs(series[0].pts, gapLimit)) {
+        if (run.length < 2) continue;
+        let d = `M${x(run[0].t)},${y(vMin)}`;
+        for (const p of run) d += `L${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`;
+        d += `L${x(run[run.length - 1].t)},${y(vMin)}Z`;
+        svg.append(el("path", { d, fill: `url(#${gid})` }));
+      }
+    }
+
+    // lines, broken across long gaps
     for (const s of series) {
       let d = "";
-      s.pts.forEach((p, i) => {
-        const brk = i === 0 || p.t - s.pts[i - 1].t > gapLimit;
-        d += `${brk ? "M" : "L"}${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`;
-      });
+      for (const run of runs(s.pts, gapLimit)) {
+        run.forEach((p, i) => { d += `${i ? "L" : "M"}${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`; });
+        if (run.length === 1) svg.append(el("circle", { cx: x(run[0].t), cy: y(run[0].v), r: 3, fill: color(s.room) }));
+      }
       svg.append(el("path", { d, fill: "none", stroke: color(s.room), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
-      // lone points (between gaps) need a dot to be visible
-      s.pts.forEach((p, i) => {
-        const prevGap = i === 0 || p.t - s.pts[i - 1].t > gapLimit;
-        const nextGap = i === s.pts.length - 1 || s.pts[i + 1].t - p.t > gapLimit;
-        if (prevGap && nextGap) svg.append(el("circle", { cx: x(p.t), cy: y(p.v), r: 2.5, fill: color(s.room) }));
-      });
       const last = s.pts[s.pts.length - 1];
-      svg.append(el("circle", { cx: x(last.t), cy: y(last.v), r: 4, fill: color(s.room), stroke: "var(--surface-1)", "stroke-width": 2 }));
+      svg.append(el("circle", { cx: x(last.t), cy: y(last.v), r: 4.5, fill: color(s.room), stroke: "var(--surface-1)", "stroke-width": 2 }));
     }
 
     // hover layer: crosshair + tooltip
@@ -339,10 +595,11 @@
       for (const s of series) {
         const p = nearest(s.pts, t);
         if (!p || Math.abs(p.t - t) > gapLimit / 2) continue;
-        dots.append(el("circle", { cx: x(p.t), cy: y(p.v), r: 4, fill: color(s.room), stroke: "var(--surface-1)", "stroke-width": 2 }));
+        dots.append(el("circle", { cx: x(p.t), cy: y(p.v), r: 4.5, fill: color(s.room), stroke: "var(--surface-1)", "stroke-width": 2 }));
         const row = el("div", { class: "row" });
         row.append(el("span", { class: "key", style: `background:${color(s.room)}` }), el("strong", {}, fmt1(p.v) + unit));
         if (series.length > 1) row.append(el("span", { class: "nm" }, s.room));
+        if (epa) row.append(el("span", { class: "nm" }, "· " + zoneOf(p.v).label));
         tip.append(row);
       }
       tip.style.display = "block";
@@ -369,10 +626,23 @@
       if (e.key === "Escape") hide();
     });
 
-    const vals = all.map((p) => p.v);
-    $(hintId).textContent = `${fmt1(Math.min(...vals))}–${fmt1(Math.max(...vals))}${unit} in range`;
+    // summary stats under the chart
+    const statItems = [["Average", fmt1(avg(vals)) + unit], ["Low", fmt1(Math.min(...vals)) + unit], ["High", fmt1(Math.max(...vals)) + unit], ["Readings", String(vals.length)]];
+    if (epa) statItems.splice(3, 0, ["Above 60%", Math.round((vals.filter((v) => v >= EPA.limit).length / vals.length) * 100) + "%"]);
+    for (const [k, v] of statItems) { const d = el("div"); d.append(el("b", {}, v), document.createTextNode(k)); stats.append(d); }
+    $(hintId).textContent = rangeName();
   }
 
+  function runs(pts, gapLimit) {
+    const out = [];
+    let cur = [];
+    pts.forEach((p, i) => {
+      if (i && p.t - pts[i - 1].t > gapLimit) { out.push(cur); cur = []; }
+      cur.push(p);
+    });
+    if (cur.length) out.push(cur);
+    return out;
+  }
   function nearest(pts, t) {
     let lo = 0, hi = pts.length - 1;
     while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (pts[mid].t < t) lo = mid; else hi = mid; }
@@ -382,7 +652,7 @@
     const ts = [...new Set(pts.map((p) => p.t))].sort((a, b) => a - b);
     const diffs = ts.slice(1).map((t, i) => t - ts[i]).sort((a, b) => a - b);
     const median = diffs.length ? diffs[diffs.length >> 1] : 3600e3;
-    return Math.max(median * 3, 45 * 60e3);
+    return Math.max(median * 3, 4 * 3600e3);
   }
   function niceStep(raw) {
     const p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
@@ -390,12 +660,12 @@
   }
   function timeTicks(t0, t1, width) {
     const span = t1 - t0, H = 3600e3, D = 24 * H;
-    const target = Math.max(2, Math.floor(width / 80));
-    const steps = [H, 2 * H, 3 * H, 6 * H, 12 * H, D, 2 * D, 7 * D, 14 * D, 30 * D, 91 * D];
+    const target = Math.max(3, Math.floor(width / 70));
+    const steps = [H, 2 * H, 3 * H, 4 * H, 6 * H, 12 * H, D, 2 * D, 7 * D, 14 * D, 30 * D, 91 * D];
     const step = steps.find((s) => span / s <= target) || 182 * D;
     const ticks = [];
     const first = new Date(t0);
-    if (step >= D) first.setHours(0, 0, 0, 0); else first.setMinutes(0, 0, 0);
+    if (step >= D) first.setHours(0, 0, 0, 0); else first.setHours(Math.ceil(first.getHours() / (step / H)) * (step / H), 0, 0, 0);
     for (let t = +first; t <= t1; t += step) if (t >= t0) ticks.push(t);
     const label = step < D
       ? (d) => d.toLocaleTimeString([], { hour: "numeric" })
@@ -413,7 +683,7 @@
         el("td", {}, r.t.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })),
         el("td", {}, r.room),
         el("td", { class: "num" }, r.tempF == null ? "–" : fmt1(toUnit(r.tempF)) + "°" + state.unit),
-        el("td", { class: "num" }, r.hum == null ? "–" : fmt1(r.hum) + "%"),
+        el("td", { class: "num" }, r.hum == null ? "–" : `${fmt1(r.hum)}% · ${zoneOf(r.hum).label}`),
       );
       body.append(tr);
     }
@@ -424,41 +694,59 @@
     const start = rangeStart();
     const rows = state.rows.filter((r) => +r.t >= start);
     renderTiles(rows);
-    renderChart("chartT", "legendT", "tempRange", rows, (r) => toUnit(r.tempF), "°" + state.unit);
-    renderChart("chartH", "legendH", "humRange", rows, (r) => r.hum, "%");
+    renderGauges(rows);
+    renderChart({ boxId: "chartH", legendId: "legendH", hintId: "humHint", statsId: "statsH", rows, pick: (r) => r.hum, unit: "%", title: "Relative humidity", epa: true });
+    renderChart({ boxId: "chartT", legendId: "legendT", hintId: "tempHint", statsId: "statsT", rows, pick: (r) => toUnit(r.tempF), unit: "°" + state.unit, title: "Temperature" });
     renderTable(rows);
     const last = state.rows[state.rows.length - 1];
-    $("updated").textContent = last ? `Last reading ${ago(last.t)}` : "No readings yet";
+    const checked = state.lastFetch ? ` · checked ${state.lastFetch.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}` : "";
+    $("updated").textContent = (last ? `Last reading ${ago(last.t)}` : "No readings yet") + checked;
   }
 
   function notice(html) { $("notice").innerHTML = html ? `<div class="notice">${html}</div>` : ""; }
 
+  async function fetchCsv() {
+    let lastErr = null;
+    for (const src of sources()) {
+      try {
+        const url = src.url + (src.url.includes("?") ? "&" : "?") + "t=" + Date.now();
+        const res = await fetch(url, { cache: "no-store", headers: src.headers || {} });
+        if (res.status === 404) { lastErr = 404; continue; }
+        if (!res.ok) { lastErr = res.status; continue; }
+        return await res.text();
+      } catch (e) { lastErr = e; }
+    }
+    throw lastErr;
+  }
+
+  let loading = false;
   async function load() {
-    const url = csvUrl();
-    if (!url) {
-      $("updated").textContent = "Not connected";
-      notice("Can't tell which repository to read from. Open this page from its GitHub Pages address, or set <code>CONFIG.repo</code> in index.html.");
-      render();
-      return;
-    }
+    if (loading) return;
+    loading = true;
+    const btn = $("refresh");
+    btn.disabled = true; btn.classList.add("spin"); btn.querySelector("span").textContent = "Refreshing…";
     try {
-      const res = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
-      if (res.status === 404) {
-        notice("No readings yet. Once the HomePod sends its first reading, it will show up here within a few minutes.");
-        state.rows = [];
-      } else if (!res.ok) {
-        throw new Error("HTTP " + res.status);
-      } else {
-        state.rows = parse(await res.text());
-        notice("");
+      if (!sources().length) {
+        $("updated").textContent = "Not connected";
+        notice("Can't tell which repository to read from. Open this page from its GitHub Pages address, or set <code>CONFIG.repo</code> in index.html.");
+        return;
       }
-    } catch (e) {
-      notice("Couldn't load readings right now. Retrying automatically.");
+      try {
+        state.rows = parse(await fetchCsv());
+        notice("");
+      } catch (e) {
+        if (e === 404) { state.rows = []; notice("No readings yet. Once the HomePod sends its first reading, it will show up here."); }
+        else notice("Couldn't load readings right now. Tap Refresh to try again.");
+      }
+      state.lastFetch = new Date();
+      const seen = [];
+      for (const r of state.rows) if (!seen.includes(r.room)) seen.push(r.room);
+      state.rooms = seen; // first-seen order keeps each room's color stable
+    } finally {
+      render();
+      loading = false;
+      btn.disabled = false; btn.classList.remove("spin"); btn.querySelector("span").textContent = "Refresh";
     }
-    const seen = [];
-    for (const r of state.rows) if (!seen.includes(r.room)) seen.push(r.room);
-    state.rooms = seen; // first-seen order keeps each room's color stable
-    render();
   }
 
   function bindSeg(id, key, after) {
@@ -474,9 +762,11 @@
   }
   bindSeg("range", "range");
   bindSeg("units", "unit", () => { try { localStorage.setItem("climate-unit", state.unit); } catch (e) {} });
+  $("refresh").addEventListener("click", load);
 
   let resizeTimer;
   addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
+  document.addEventListener("visibilitychange", () => { if (!document.hidden) load(); });
 
   load();
   setInterval(load, CONFIG.refreshMinutes * 60e3);
