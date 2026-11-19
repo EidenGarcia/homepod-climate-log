@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Home Climate</title>
+<style>
+  :root {
+    color-scheme: light;
+    --surface-0: #f4f4f2;
+    --surface-1: #fcfcfb;
+    --border: #e4e3df;
+    --grid: #ecebe7;
+    --axis: #b9b8b2;
+    --text-primary: #0b0b0b;
+    --text-secondary: #52514e;
+    --text-muted: #7a7974;
+    --accent: #2a78d6;
+    --series-1: #2a78d6; --series-2: #eb6834; --series-3: #1baf7a; --series-4: #eda100;
+    --series-5: #e87ba4; --series-6: #008300; --series-7: #6250d6; --series-8: #e34948;
+    --warn-bg: #fff6e0; --warn-text: #6b4a00;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      color-scheme: dark;
+      --surface-0: #111110;
+      --surface-1: #1a1a19;
+      --border: #2c2c2a;
+      --grid: #262624;
+      --axis: #4a4a46;
+      --text-primary: #f0efec;
+      --text-secondary: #c3c2b7;
+      --text-muted: #8e8d86;
+      --accent: #3987e5;
+      --series-1: #3987e5; --series-2: #d95926; --series-3: #199e70; --series-4: #c98500;
+      --series-5: #d55181; --series-6: #0ca30c; --series-7: #9085e9; --series-8: #e66767;
+      --warn-bg: #2e2510; --warn-text: #f0d48a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--surface-0); color: var(--text-primary);
+    font: 15px/1.45 -apple-system, BlinkMacSystemFont, "SF Pro Text", "Segoe UI", Roboto, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 880px; margin: 0 auto; padding: 20px 16px 48px; }
+  header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: -0.01em; }
+  #updated { color: var(--text-secondary); font-size: 13px; }
+
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 16px 0; }
+  .seg { display: inline-flex; background: var(--surface-1); border: 1px solid var(--border); border-radius: 10px; padding: 2px; }
+  .seg button {
+    appearance: none; border: 0; background: transparent; color: var(--text-secondary);
+    font: inherit; font-size: 13px; padding: 6px 11px; border-radius: 8px; cursor: pointer; min-height: 32px;
+  }
+  .seg button[aria-pressed="true"] { background: var(--surface-0); color: var(--text-primary); font-weight: 600; box-shadow: 0 0 0 1px var(--border); }
+  .seg button:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
+  .tile { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px; }
+  .tile .label { font-size: 13px; color: var(--text-secondary); display: flex; align-items: center; gap: 6px; }
+  .tile .value { font-size: 40px; font-weight: 600; letter-spacing: -0.02em; line-height: 1.1; margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .tile .value small { font-size: 20px; font-weight: 500; color: var(--text-secondary); margin-left: 2px; }
+  .tile .sub { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-variant-numeric: tabular-nums; }
+  .key { width: 12px; height: 2px; border-radius: 1px; display: inline-block; }
+
+  .card { background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 14px 16px 8px; margin-top: 12px; }
+  .card h2 { font-size: 15px; margin: 0; font-weight: 600; }
+  .card .hint { font-size: 12px; color: var(--text-muted); }
+  .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-secondary); margin-top: 6px; }
+  .legend span { display: inline-flex; align-items: center; gap: 6px; }
+  .chart { position: relative; margin-top: 6px; touch-action: pan-y; }
+  .chart svg { display: block; width: 100%; overflow: visible; }
+  .chart svg:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+  .tick { font-size: 11px; fill: var(--text-muted); font-variant-numeric: tabular-nums; }
+  .tip {
+    position: absolute; pointer-events: none; background: var(--surface-1); border: 1px solid var(--border);
+    border-radius: 10px; padding: 8px 10px; font-size: 12px; box-shadow: 0 4px 16px rgb(0 0 0 / 0.12);
+    white-space: nowrap; display: none; z-index: 2;
+  }
+  .tip .t { color: var(--text-secondary); margin-bottom: 4px; }
+  .tip .row { display: flex; align-items: center; gap: 6px; }
+  .tip strong { font-variant-numeric: tabular-nums; }
+  .tip .nm { color: var(--text-secondary); }
+
+  details { margin-top: 12px; background: var(--surface-1); border: 1px solid var(--border); border-radius: 14px; padding: 12px 16px; }
+  summary { cursor: pointer; font-weight: 600; font-size: 15px; }
+  table { width: 100%; border-collapse: collapse; margin-top: 10px; font-size: 13px; font-variant-numeric: tabular-nums; }
+  th, td { text-align: left; padding: 6px 4px; border-bottom: 1px solid var(--grid); }
+  th { color: var(--text-secondary); font-weight: 500; }
+  td.num, th.num { text-align: right; }
+
+  .notice { background: var(--warn-bg); color: var(--warn-text); border-radius: 12px; padding: 12px 14px; font-size: 14px; margin-top: 12px; }
+  .notice code { font-size: 12px; }
+  .empty { color: var(--text-muted); font-size: 13px; padding: 30px 0; text-align: center; }
+  footer { margin-top: 20px; font-size: 12px; color: var(--text-muted); }
+  footer a { color: var(--text-secondary); }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>Home Climate</h1>
+    <span id="updated">Loading…</span>
+  </header>
+
+  <div class="controls" role="toolbar" aria-label="Chart filters">
+    <div class="seg" id="range" aria-label="Time range">
+      <button data-v="24h" aria-pressed="true">24 h</button>
+      <button data-v="7d" aria-pressed="false">7 days</button>
+      <button data-v="30d" aria-pressed="false">30 days</button>
+      <button data-v="all" aria-pressed="false">All</button>
+    </div>
+    <div class="seg" id="units" aria-label="Temperature unit">
+      <button data-v="F" aria-pressed="true">°F</button>
+      <button data-v="C" aria-pressed="false">°C</button>
+    </div>
+  </div>
+
+  <div id="notice"></div>
+  <section class="tiles" id="tiles" aria-live="polite"></section>
+
+  <section class="card">
+    <div class="card-head"><h2>Temperature</h2><span class="hint" id="tempRange"></span></div>
+    <div class="legend" id="legendT"></div>
+    <div class="chart" id="chartT"></div>
+  </section>
+
+  <section class="card">
+    <div class="card-head"><h2>Humidity</h2><span class="hint" id="humRange"></span></div>
+    <div class="legend" id="legendH"></div>
+    <div class="chart" id="chartH"></div>
+  </section>
+
+  <details>
+    <summary>Readings table</summary>
+    <table>
+      <thead><tr><th>Time</th><th>Room</th><th class="num">Temp</th><th class="num">Humidity</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+  </details>
+
+  <footer>Readings from the HomePod's built-in sensor, logged by GitHub Actions. Page refreshes every 5 minutes.</footer>
+</main>
+
+<script>
+(() => {
+  // ---- Settings you can change ------------------------------------------
+  const CONFIG = {
+    repo: "",          // "your-username/your-repo" - leave blank to detect it from the GitHub Pages address
+    branch: "data",    // branch the workflow writes readings to
+    file: "readings.csv",
+    refreshMinutes: 5,
+  };
+  // -----------------------------------------------------------------------
+
+  const $ = (id) => document.getElementById(id);
+  const SLOTS = 8;
+  const state = { range: "24h", unit: "F", rows: [], rooms: [] };
+  try { state.unit = localStorage.getItem("climate-unit") || "F"; } catch (e) {}
+
+  function csvUrl() {
+    const q = new URLSearchParams(location.search);
+    if (q.get("csv")) return q.get("csv");
+    let repo = q.get("repo") || CONFIG.repo;
+    if (!repo && location.hostname.endsWith(".github.io")) {
+      const owner = location.hostname.split(".")[0];
+      const seg = location.pathname.split("/").filter(Boolean)[0];
+      repo = owner + "/" + (seg && !seg.includes(".") ? seg : location.hostname);
+    }
+    if (!repo) return null;
+    return `https://raw.githubusercontent.com/${repo}/${CONFIG.branch}/${CONFIG.file}`;
+  }
+
+  function parse(text) {
+    const lines = text.trim().split(/\r?\n/);
+    const head = lines.shift().split(",");
+    const ix = (n) => head.indexOf(n);
+    const out = [];
+    for (const line of lines) {
+      const c = line.split(",");
+      const t = new Date(c[ix("time_utc")]);
+      if (isNaN(t)) continue;
+      const tv = c[ix("temperature")], hv = c[ix("humidity")];
+      let temp = tv === "" || tv == null ? null : +tv;
+      const unit = (c[ix("unit")] || "F").toUpperCase();
+      if (temp != null && unit === "C") temp = temp * 9 / 5 + 32; // store internally in °F
+      out.push({ t, room: c[ix("room")] || "HomePod", tempF: temp, hum: hv === "" || hv == null ? null : +hv });
+    }
+    return out.sort((a, b) => a.t - b.t);
+  }
+
+  const toUnit = (f) => (f == null ? null : state.unit === "C" ? (f - 32) * 5 / 9 : f);
+  const fmt1 = (v) => (v == null ? "–" : (Math.round(v * 10) / 10).toFixed(1).replace(/\.0$/, ""));
+  const color = (room) => `var(--series-${(state.rooms.indexOf(room) % SLOTS) + 1})`;
+
+  function rangeStart() {
+    const now = Date.now(), h = 3600e3;
+    return { "24h": now - 24 * h, "7d": now - 7 * 24 * h, "30d": now - 30 * 24 * h, all: -Infinity }[state.range];
+  }
+
+  function ago(d) {
+    const m = Math.round((Date.now() - d) / 60000);
+    if (m < 1) return "just now";
+    if (m < 60) return `${m} min ago`;
+    const h = Math.round(m / 60);
+    if (h < 48) return `${h} h ago`;
+    return `${Math.round(h / 24)} days ago`;
+  }
+
+  function el(tag, attrs = {}, text) {
+    const svgTags = ["svg", "path", "line", "text", "circle", "rect", "g"];
+    const n = svgTags.includes(tag) ? document.createElementNS("http://www.w3.org/2000/svg", tag) : document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (text != null) n.textContent = text;
+    return n;
+  }
+
+  // ---- Stat tiles --------------------------------------------------------
+  function renderTiles(rows) {
+    const box = $("tiles");
+    box.replaceChildren();
+    const u = "°" + state.unit;
+    for (const room of state.rooms) {
+      const mine = state.rows.filter((r) => r.room === room);
+      const lastT = [...mine].reverse().find((r) => r.tempF != null);
+      const lastH = [...mine].reverse().find((r) => r.hum != null);
+      const inRange = rows.filter((r) => r.room === room);
+      const temps = inRange.map((r) => toUnit(r.tempF)).filter((v) => v != null);
+      const hums = inRange.map((r) => r.hum).filter((v) => v != null);
+      const label = state.rooms.length > 1 ? ` · ${room}` : "";
+      box.append(tile("Temperature" + label, lastT && fmt1(toUnit(lastT.tempF)), u,
+        temps.length ? `Low ${fmt1(Math.min(...temps))} · High ${fmt1(Math.max(...temps))}` : "No readings in range", room));
+      box.append(tile("Humidity" + label, lastH && fmt1(lastH.hum), "%",
+        hums.length ? `Low ${fmt1(Math.min(...hums))} · High ${fmt1(Math.max(...hums))}` : "No readings in range", room));
+    }
+  }
+  function tile(label, value, unit, sub, room) {
+    const t = el("div", { class: "tile" });
+    const l = el("div", { class: "label" });
+    if (state.rooms.length > 1) l.append(el("span", { class: "key", style: `background:${color(room)}` }));
+    l.append(document.createTextNode(label));
+    const v = el("div", { class: "value" }, value ?? "–");
+    if (value != null) v.append(el("small", {}, unit));
+    t.append(l, v, el("div", { class: "sub" }, sub));
+    return t;
+  }
+
+  // ---- Line chart (one measure per chart, one line per room) -------------
+  function renderChart(boxId, legendId, hintId, rows, pick, unit, decimals) {
+    const box = $(boxId);
+    box.replaceChildren();
+    const series = state.rooms
+      .map((room) => ({ room, pts: rows.filter((r) => r.room === room && pick(r) != null).map((r) => ({ t: +r.t, v: pick(r) })) }))
+      .filter((s) => s.pts.length);
+
+    const legend = $(legendId);
+    legend.replaceChildren();
+    if (series.length > 1) {
+      for (const s of series) {
+        const sp = el("span");
+        sp.append(el("span", { class: "key", style: `background:${color(s.room)}` }), document.createTextNode(s.room));
+        legend.append(sp);
+      }
+    }
+
+    const all = series.flatMap((s) => s.pts);
+    if (!all.length) { box.append(el("div", { class: "empty" }, "No readings in this range yet.")); $(hintId).textContent = ""; return; }
+
+    const W = Math.max(box.clientWidth, 280), H = 200;
+    const m = { l: 34, r: 12, t: 10, b: 24 };
+    const iw = W - m.l - m.r, ih = H - m.t - m.b;
+
+    let t0 = Math.min(...all.map((p) => p.t)), t1 = Math.max(...all.map((p) => p.t));
+    if (state.range !== "all") t0 = Math.min(t0, rangeStart()), t1 = Math.max(t1, Date.now());
+    if (t1 - t0 < 3600e3) t0 = t1 - 3600e3;
+    let vMin = Math.min(...all.map((p) => p.v)), vMax = Math.max(...all.map((p) => p.v));
+    const pad = Math.max((vMax - vMin) * 0.15, unit === "%" ? 3 : 1);
+    const step = niceStep((vMax - vMin + 2 * pad) / 4);
+    vMin = Math.floor((vMin - pad) / step) * step;
+    vMax = Math.ceil((vMax + pad) / step) * step;
+
+    const x = (t) => m.l + ((t - t0) / (t1 - t0)) * iw;
+    const y = (v) => m.t + ih - ((v - vMin) / (vMax - vMin)) * ih;
+
+    const svg = el("svg", { viewBox: `0 0 ${W} ${H}`, height: H, role: "img", tabindex: "0",
+      "aria-label": `${boxId === "chartT" ? "Temperature" : "Humidity"} over time. Use arrow keys to step through readings.` });
+
+    // grid + y ticks
+    for (let v = vMin; v <= vMax + 1e-9; v += step) {
+      svg.append(el("line", { x1: m.l, x2: W - m.r, y1: y(v), y2: y(v), stroke: v === vMin ? "var(--axis)" : "var(--grid)", "stroke-width": 1 }));
+      svg.append(el("text", { x: m.l - 6, y: y(v) + 4, "text-anchor": "end", class: "tick" }, fmt1(v)));
+    }
+    // x ticks
+    const xt = timeTicks(t0, t1, iw);
+    for (const t of xt.ticks) {
+      svg.append(el("text", { x: x(t), y: H - 6, "text-anchor": "middle", class: "tick" }, xt.label(new Date(t))));
+    }
+
+    // lines, broken across long gaps
+    const gapLimit = gapThreshold(all);
+    for (const s of series) {
+      let d = "";
+      s.pts.forEach((p, i) => {
+        const brk = i === 0 || p.t - s.pts[i - 1].t > gapLimit;
+        d += `${brk ? "M" : "L"}${x(p.t).toFixed(1)},${y(p.v).toFixed(1)}`;
+      });
+      svg.append(el("path", { d, fill: "none", stroke: color(s.room), "stroke-width": 2, "stroke-linejoin": "round", "stroke-linecap": "round" }));
+      // lone points (between gaps) need a dot to be visible
+      s.pts.forEach((p, i) => {
+        const prevGap = i === 0 || p.t - s.pts[i - 1].t > gapLimit;
+        const nextGap = i === s.pts.length - 1 || s.pts[i + 1].t - p.t > gapLimit;
+        if (prevGap && nextGap) svg.append(el("circle", { cx: x(p.t), cy: y(p.v), r: 2.5, fill: color(s.room) }));
+      });
+      const last = s.pts[s.pts.length - 1];
+      svg.append(el("circle", { cx: x(last.t), cy: y(last.v), r: 4, fill: color(s.room), stroke: "var(--surface-1)", "stroke-width": 2 }));
+    }
+
+    // hover layer: crosshair + tooltip
+    const cross = el("line", { y1: m.t, y2: m.t + ih, stroke: "var(--text-muted)", "stroke-width": 1, "stroke-dasharray": "3 3", visibility: "hidden" });
+    const dots = el("g", { visibility: "hidden" });
+    svg.append(cross, dots);
+    box.append(svg);
+    const tip = el("div", { class: "tip" });
+    box.append(tip);
+
+    const times = [...new Set(all.map((p) => p.t))].sort((a, b) => a - b);
+    let cursor = times.length - 1;
+
+    function show(i) {
+      cursor = Math.max(0, Math.min(times.length - 1, i));
+      const t = times[cursor];
+      const px = x(t);
+      cross.setAttribute("x1", px); cross.setAttribute("x2", px); cross.setAttribute("visibility", "visible");
+      dots.replaceChildren(); dots.setAttribute("visibility", "visible");
+      tip.replaceChildren(el("div", { class: "t" }, new Date(t).toLocaleString([], { weekday: "short", month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })));
+      for (const s of series) {
+        const p = nearest(s.pts, t);
+        if (!p || Math.abs(p.t - t) > gapLimit / 2) continue;
+        dots.append(el("circle", { cx: x(p.t), cy: y(p.v), r: 4, fill: color(s.room), stroke: "var(--surface-1)", "stroke-width": 2 }));
+        const row = el("div", { class: "row" });
+        row.append(el("span", { class: "key", style: `background:${color(s.room)}` }), el("strong", {}, fmt1(p.v) + unit));
+        if (series.length > 1) row.append(el("span", { class: "nm" }, s.room));
+        tip.append(row);
+      }
+      tip.style.display = "block";
+      const scale = box.clientWidth / W;
+      const left = px * scale, tw = tip.offsetWidth;
+      tip.style.left = Math.max(0, Math.min(box.clientWidth - tw, left + (left > box.clientWidth / 2 ? -tw - 12 : 12))) + "px";
+      tip.style.top = "8px";
+    }
+    function hide() { cross.setAttribute("visibility", "hidden"); dots.setAttribute("visibility", "hidden"); tip.style.display = "none"; }
+
+    svg.addEventListener("pointermove", (e) => {
+      const r = svg.getBoundingClientRect();
+      const t = t0 + (((e.clientX - r.left) * (W / r.width) - m.l) / iw) * (t1 - t0);
+      let best = 0;
+      for (let i = 1; i < times.length; i++) if (Math.abs(times[i] - t) < Math.abs(times[best] - t)) best = i;
+      show(best);
+    });
+    svg.addEventListener("pointerleave", hide);
+    svg.addEventListener("blur", hide);
+    svg.addEventListener("focus", () => show(cursor));
+    svg.addEventListener("keydown", (e) => {
+      if (e.key === "ArrowLeft") { show(cursor - 1); e.preventDefault(); }
+      if (e.key === "ArrowRight") { show(cursor + 1); e.preventDefault(); }
+      if (e.key === "Escape") hide();
+    });
+
+    const vals = all.map((p) => p.v);
+    $(hintId).textContent = `${fmt1(Math.min(...vals))}–${fmt1(Math.max(...vals))}${unit} in range`;
+  }
+
+  function nearest(pts, t) {
+    let lo = 0, hi = pts.length - 1;
+    while (hi - lo > 1) { const mid = (lo + hi) >> 1; if (pts[mid].t < t) lo = mid; else hi = mid; }
+    return Math.abs(pts[lo].t - t) <= Math.abs(pts[hi].t - t) ? pts[lo] : pts[hi];
+  }
+  function gapThreshold(pts) {
+    const ts = [...new Set(pts.map((p) => p.t))].sort((a, b) => a - b);
+    const diffs = ts.slice(1).map((t, i) => t - ts[i]).sort((a, b) => a - b);
+    const median = diffs.length ? diffs[diffs.length >> 1] : 3600e3;
+    return Math.max(median * 3, 45 * 60e3);
+  }
+  function niceStep(raw) {
+    const p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p;
+    return (f <= 1 ? 1 : f <= 2 ? 2 : f <= 2.5 ? 2.5 : f <= 5 ? 5 : 10) * p;
+  }
+  function timeTicks(t0, t1, width) {
+    const span = t1 - t0, H = 3600e3, D = 24 * H;
+    const target = Math.max(2, Math.floor(width / 80));
+    const steps = [H, 2 * H, 3 * H, 6 * H, 12 * H, D, 2 * D, 7 * D, 14 * D, 30 * D, 91 * D];
+    const step = steps.find((s) => span / s <= target) || 182 * D;
+    const ticks = [];
+    const first = new Date(t0);
+    if (step >= D) first.setHours(0, 0, 0, 0); else first.setMinutes(0, 0, 0);
+    for (let t = +first; t <= t1; t += step) if (t >= t0) ticks.push(t);
+    const label = step < D
+      ? (d) => d.toLocaleTimeString([], { hour: "numeric" })
+      : (d) => d.toLocaleDateString([], { month: "short", day: "numeric" });
+    return { ticks, label };
+  }
+
+  // ---- Table --------------------------------------------------------------
+  function renderTable(rows) {
+    const body = $("rows");
+    body.replaceChildren();
+    for (const r of [...rows].reverse().slice(0, 200)) {
+      const tr = el("tr");
+      tr.append(
+        el("td", {}, r.t.toLocaleString([], { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })),
+        el("td", {}, r.room),
+        el("td", { class: "num" }, r.tempF == null ? "–" : fmt1(toUnit(r.tempF)) + "°" + state.unit),
+        el("td", { class: "num" }, r.hum == null ? "–" : fmt1(r.hum) + "%"),
+      );
+      body.append(tr);
+    }
+  }
+
+  // ---- Wiring -------------------------------------------------------------
+  function render() {
+    const start = rangeStart();
+    const rows = state.rows.filter((r) => +r.t >= start);
+    renderTiles(rows);
+    renderChart("chartT", "legendT", "tempRange", rows, (r) => toUnit(r.tempF), "°" + state.unit);
+    renderChart("chartH", "legendH", "humRange", rows, (r) => r.hum, "%");
+    renderTable(rows);
+    const last = state.rows[state.rows.length - 1];
+    $("updated").textContent = last ? `Last reading ${ago(last.t)}` : "No readings yet";
+  }
+
+  function notice(html) { $("notice").innerHTML = html ? `<div class="notice">${html}</div>` : ""; }
+
+  async function load() {
+    const url = csvUrl();
+    if (!url) {
+      $("updated").textContent = "Not connected";
+      notice("Can't tell which repository to read from. Open this page from its GitHub Pages address, or set <code>CONFIG.repo</code> in index.html.");
+      render();
+      return;
+    }
+    try {
+      const res = await fetch(url + (url.includes("?") ? "&" : "?") + "t=" + Date.now(), { cache: "no-store" });
+      if (res.status === 404) {
+        notice("No readings yet. Once the HomePod sends its first reading, it will show up here within a few minutes.");
+        state.rows = [];
+      } else if (!res.ok) {
+        throw new Error("HTTP " + res.status);
+      } else {
+        state.rows = parse(await res.text());
+        notice("");
+      }
+    } catch (e) {
+      notice("Couldn't load readings right now. Retrying automatically.");
+    }
+    const seen = [];
+    for (const r of state.rows) if (!seen.includes(r.room)) seen.push(r.room);
+    state.rooms = seen; // first-seen order keeps each room's color stable
+    render();
+  }
+
+  function bindSeg(id, key, after) {
+    const seg = $(id);
+    const sync = () => seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.v === state[key]));
+    seg.addEventListener("click", (e) => {
+      const b = e.target.closest("button");
+      if (!b) return;
+      state[key] = b.dataset.v;
+      sync(); after && after(); render();
+    });
+    sync();
+  }
+  bindSeg("range", "range");
+  bindSeg("units", "unit", () => { try { localStorage.setItem("climate-unit", state.unit); } catch (e) {} });
+
+  let resizeTimer;
+  addEventListener("resize", () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(render, 150); });
+
+  load();
+  setInterval(load, CONFIG.refreshMinutes * 60e3);
+})();
+</script>
+</body>
+</html>
