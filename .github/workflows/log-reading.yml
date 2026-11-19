@@ -1,1 +1,100 @@
+name: Log climate reading
 
+on:
+  repository_dispatch:
+    types: [climate]
+  workflow_dispatch:
+    inputs:
+      temperature:
+        description: Temperature
+        required: true
+      humidity:
+        description: Humidity (%)
+        required: true
+      room:
+        description: Room name
+        default: HomePod
+      unit:
+        description: F or C
+        default: F
+
+permissions:
+  contents: write
+
+concurrency:
+  group: climate-log
+  cancel-in-progress: false
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Switch to the data branch
+        run: |
+          git config user.name "climate-logger"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          if git ls-remote --exit-code --heads origin data >/dev/null 2>&1; then
+            git checkout -q -B data origin/data
+          else
+            git checkout -q --orphan data
+            git rm -rfq . >/dev/null 2>&1 || true
+            git clean -fdxq
+          fi
+
+      - name: Append the reading
+        env:
+          TEMP: ${{ github.event.client_payload.temperature || inputs.temperature }}
+          HUM: ${{ github.event.client_payload.humidity || inputs.humidity }}
+          ROOM: ${{ github.event.client_payload.room || inputs.room || 'HomePod' }}
+          UNIT: ${{ github.event.client_payload.unit || inputs.unit || 'F' }}
+        run: |
+          python3 - <<'PY'
+          import csv, datetime, os, pathlib, re
+
+          def number(name):
+              m = re.search(r"-?\d+(?:[.,]\d+)?", os.environ.get(name, ""))
+              return float(m.group(0).replace(",", ".")) if m else None
+
+          unit = "C" if os.environ.get("UNIT", "F").strip().upper().startswith("C") else "F"
+          temp, hum = number("TEMP"), number("HUM")
+
+          lo, hi = (-40, 60) if unit == "C" else (-40, 140)
+          if temp is not None and (temp == 0 or not lo <= temp <= hi):
+              temp = None
+          if hum is not None and not 0 < hum <= 100:
+              hum = None
+
+          room = re.sub(r"[^\w \-]", "", os.environ.get("ROOM", "")).strip()[:40] or "HomePod"
+
+          if temp is None and hum is None:
+              print("::warning::No usable reading received - nothing logged.")
+              raise SystemExit(0)
+
+          path = pathlib.Path("readings.csv")
+          new = not path.exists()
+          with path.open("a", newline="") as f:
+              w = csv.writer(f)
+              if new:
+                  w.writerow(["time_utc", "room", "temperature", "unit", "humidity"])
+              now = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+              w.writerow([now, room, "" if temp is None else round(temp, 1), unit,
+                          "" if hum is None else round(hum, 1)])
+          print(f"Logged {room}: temp={temp}{unit} humidity={hum}%")
+          PY
+
+      - name: Save to GitHub
+        run: |
+          git add readings.csv 2>/dev/null || exit 0
+          git diff --cached --quiet && exit 0
+          git commit -q -m "Reading $(date -u +%Y-%m-%dT%H:%MZ)"
+          for i in 1 2 3 4 5; do
+            git push -q origin data && exit 0
+            sleep $((i * 3))
+            git pull -q --rebase origin data || true
+          done
+          exit 1
