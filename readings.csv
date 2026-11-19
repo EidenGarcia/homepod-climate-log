@@ -7,3 +7,4 @@ time_utc,room,temperature,unit,humidity
 2026-11-19T13:00:14Z,Living Room,25.2,C,60.0
 2026-11-19T14:00:14Z,Living Room,25.5,C,64.0
 2026-11-19T15:00:16Z,Living Room,25.7,C,65.0
+2026-11-19T16:00:16Z,Living Room,26.1,C,77.0
