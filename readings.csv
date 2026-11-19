@@ -3,3 +3,4 @@ time_utc,room,temperature,unit,humidity
 2026-11-19T02:18:08Z,Living Room,,F,40.0
 2026-11-19T02:20:09Z,Living Room,,C,40.0
 2026-11-19T02:22:59Z,Living Room,,C,40.0
+2026-11-19T02:25:44Z,Living Room,24.0,C,40.0
